@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* ElevenLabs widget customization */
+elevenlabs-convai {
+  --elevenlabs-convai-widget-width: 100%;
+  --elevenlabs-convai-widget-height: 100%;
+}
