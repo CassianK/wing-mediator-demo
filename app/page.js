@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 const API_BASE = 'https://wmediator.trinos.group'
 const AGENT_ID = 'agent_1201km3k1xa0ee0bc2j2zdpp5rr6'
@@ -222,46 +222,205 @@ function DashboardTab({ user }) {
   )
 }
 
+// ─── Persona config ───
+const PERSONAS = {
+  facilitator: { label: '[진행]', color: 'purple', bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-600' },
+  applicant:   { label: '[신청인]', color: 'blue', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-600' },
+  respondent:  { label: '[피신청인]', color: 'orange', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-600' },
+  coach:       { label: '[코치]', color: 'green', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-100 text-green-600' },
+  unknown:     { label: 'AI', color: 'gray', bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-700', badge: 'bg-gray-200 text-gray-600' },
+}
+
+// Detect persona from XML-like tags or Korean bracket markers
+function detectPersona(text) {
+  const lower = text.toLowerCase()
+  // XML tags: <Applicant>, <Facilitator>, <Respondent>, <Coach>
+  if (/<facilitator>|<진행>/i.test(text) || /\[진행\]/i.test(text)) return 'facilitator'
+  if (/<applicant>|<신청인>/i.test(text) || /\[신청인\]/i.test(text)) return 'applicant'
+  if (/<respondent>|<피신청인>/i.test(text) || /\[피신청인\]/i.test(text)) return 'respondent'
+  if (/<coach>|<코치>/i.test(text) || /\[코치\]/i.test(text)) return 'coach'
+  return 'unknown'
+}
+
+// Strip emotion tags, persona XML tags, and bracket markers
+function cleanText(text) {
+  return text
+    // Remove emotion tags: [excited], [sad], [angry], [happy], [neutral], [curious], etc.
+    .replace(/\[(excited|sad|angry|happy|neutral|curious|surprised|worried|calm|frustrated|hopeful|disappointed|empathetic|assertive|confused|relieved|tense|anxious)\]/gi, '')
+    // Remove XML persona tags: <Applicant>, </Applicant>, <Facilitator>, etc.
+    .replace(/<\/?(Applicant|Facilitator|Respondent|Coach|신청인|피신청인|진행|코치)>/gi, '')
+    // Remove Korean bracket persona markers: [진행], [신청인], [피신청인], [코치]
+    .replace(/\[(진행|신청인|피신청인|코치)\]/g, '')
+    // Clean up extra whitespace
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+// Split text into sentences (Korean + English aware)
+function splitSentences(text) {
+  // Split on sentence-ending punctuation followed by space or end
+  const raw = text.match(/[^.!?。]*[.!?。]+[\s]?|[^.!?。]+$/g)
+  if (!raw || raw.length <= 1) return [text]
+  return raw.map(s => s.trim()).filter(s => s.length > 0)
+}
+
 // ─── Training ───
-function TrainTab({ user, setTab }) {
+function TrainTab({ user, setTab, onSessionEnd }) {
   const [sessionId, setSessionId] = useState(null)
   const [active, setActive] = useState(false)
   const [starting, setStarting] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [status, setStatus] = useState('idle') // idle, connecting, connected, speaking, listening
+  const conversationRef = useRef(null)
+  const scrollRef = useRef(null)
+  const timerRefs = useRef([]) // track sentence timers for cleanup
+
+  // Auto-scroll transcript
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [messages])
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => timerRefs.current.forEach(t => clearTimeout(t))
+  }, [])
+
+  // Add a single message bubble
+  const addMessage = useCallback((role, text, persona = 'unknown') => {
+    const cleaned = cleanText(text)
+    if (!cleaned) return
+    setMessages(prev => [...prev, {
+      role,
+      text: cleaned,
+      persona,
+      time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+    }])
+  }, [])
+
+  // Stream AI message sentence by sentence
+  const streamSentences = useCallback((fullText) => {
+    const persona = detectPersona(fullText)
+    const cleaned = cleanText(fullText)
+    if (!cleaned) return
+
+    const sentences = splitSentences(cleaned)
+
+    if (sentences.length <= 1) {
+      addMessage('agent', cleaned, persona)
+      return
+    }
+
+    sentences.forEach((sentence, idx) => {
+      const timer = setTimeout(() => {
+        addMessage('agent', sentence, persona)
+      }, idx * 600) // 600ms between each sentence
+      timerRefs.current.push(timer)
+    })
+  }, [addMessage])
 
   const startSession = async () => {
     if (!user) return alert('먼저 로그인해주세요.')
     setStarting(true)
     try {
+      // 1. Register session with Workers API
       const data = await api('/api/session/start', {
         method: 'POST',
         body: JSON.stringify({ user_id: user.id }),
       })
-      if (data.success) {
-        setSessionId(data.session_id)
-        setActive(true)
-        if (data.remaining_minutes <= 0) {
-          alert('이번 달 사용 시간이 소진되었습니다.')
-          setActive(false)
-        }
-      } else {
+      if (!data.success) {
         alert(data.error || '세션 시작 실패')
+        setStarting(false)
+        return
       }
+      if (data.remaining_minutes <= 0) {
+        alert('이번 달 사용 시간이 소진되었습니다.')
+        setStarting(false)
+        return
+      }
+      setSessionId(data.session_id)
+      setMessages([])
+      setStatus('connecting')
+      timerRefs.current = []
+
+      // 2. Start ElevenLabs conversation
+      const { Conversation } = await import('@11labs/client')
+      const conversation = await Conversation.startSession({
+        agentId: AGENT_ID,
+        onConnect: () => {
+          setStatus('connected')
+          setActive(true)
+        },
+        onDisconnect: () => {
+          setStatus('idle')
+        },
+        onMessage: ({ message, source }) => {
+          if (source === 'ai') {
+            // AI messages: detect persona, strip tags, stream sentences
+            streamSentences(message)
+          } else {
+            // User messages: just clean and add
+            addMessage('user', message, 'user')
+          }
+        },
+        onModeChange: ({ mode }) => {
+          setStatus(mode === 'speaking' ? 'speaking' : 'listening')
+        },
+        onError: (error) => {
+          console.error('ElevenLabs error:', error)
+          addMessage('system', '연결 오류가 발생했습니다. 마이크 접근을 허용했는지 확인해주세요.', 'system')
+        },
+      })
+      conversationRef.current = conversation
+
     } catch (err) {
-      alert('서버 연결 오류')
+      console.error('Start error:', err)
+      alert('연결 오류: 마이크 접근을 허용해주세요.')
+      setStatus('idle')
     }
     setStarting(false)
   }
 
   const endSession = async () => {
-    if (sessionId) {
+    const endedId = sessionId
+    // Clear pending sentence timers
+    timerRefs.current.forEach(t => clearTimeout(t))
+    timerRefs.current = []
+    // End ElevenLabs conversation
+    if (conversationRef.current) {
+      try {
+        await conversationRef.current.endSession()
+      } catch (e) { /* ignore */ }
+      conversationRef.current = null
+    }
+    // End API session
+    if (endedId) {
       await api('/api/session/end', {
         method: 'POST',
-        body: JSON.stringify({ session_id: sessionId }),
+        body: JSON.stringify({ session_id: endedId }),
       })
     }
     setActive(false)
     setSessionId(null)
+    setStatus('idle')
+    if (onSessionEnd) onSessionEnd(endedId)
     setTab('feedback')
+  }
+
+  const statusLabel = {
+    idle: { text: '대기', color: 'gray' },
+    connecting: { text: '연결 중...', color: 'yellow' },
+    connected: { text: '연결됨', color: 'green' },
+    speaking: { text: 'AI 발화 중', color: 'blue' },
+    listening: { text: '듣는 중...', color: 'green' },
+  }[status] || { text: status, color: 'gray' }
+
+  // Get persona style for a message
+  const getPersonaStyle = (msg) => {
+    if (msg.role === 'user') return null
+    if (msg.role === 'system') return null
+    return PERSONAS[msg.persona] || PERSONAS.unknown
   }
 
   if (!user) return <p className="text-center mt-20 text-gray-500">먼저 로그인해주세요.</p>
@@ -283,34 +442,111 @@ function TrainTab({ user, setTab }) {
             disabled={starting}
             className="px-5 py-2 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
           >
-            {starting ? '시작 중...' : '세션 시작'}
+            {starting ? '연결 중...' : '세션 시작'}
           </button>
         )}
       </div>
 
+      {/* Persona Legend */}
+      {active && (
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {Object.entries(PERSONAS).filter(([k]) => k !== 'unknown').map(([key, p]) => (
+            <span key={key} className={`text-xs px-2.5 py-1 rounded-full ${p.badge} font-medium`}>
+              {p.label}
+            </span>
+          ))}
+          <span className="text-xs px-2.5 py-1 rounded-full bg-brand-100 text-brand-600 font-medium">나 (조정인)</span>
+        </div>
+      )}
+
       {/* Training Area */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden" style={{ minHeight: '500px' }}>
         {active ? (
-          <div className="p-6 h-full">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-sm text-green-600 font-medium">대화 진행중</span>
+          <div className="flex flex-col h-full" style={{ minHeight: '500px' }}>
+            {/* Status Bar */}
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-100 bg-gray-50">
+              <div className={`w-3 h-3 rounded-full ${
+                status === 'speaking' ? 'bg-blue-400 animate-pulse' :
+                status === 'listening' ? 'bg-green-400 animate-pulse' :
+                'bg-yellow-400'
+              }`} />
+              <span className={`text-sm font-medium ${
+                status === 'speaking' ? 'text-blue-600' :
+                status === 'listening' ? 'text-green-600' :
+                'text-yellow-600'
+              }`}>{statusLabel.text}</span>
               {sessionId && <span className="text-xs text-gray-400 ml-auto">ID: {sessionId.slice(0, 12)}...</span>}
             </div>
-            <div className="bg-gray-50 rounded-xl p-8 flex flex-col items-center justify-center" style={{ minHeight: '400px' }}>
-              <p className="text-gray-500 mb-4 text-center">
-                아래 위젯으로 AI 조정 상대방과 대화하세요.<br />
-                <span className="text-sm text-gray-400">마이크 접근을 허용해주세요.</span>
-              </p>
-              {/* ElevenLabs Widget */}
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: `
-                    <elevenlabs-convai agent-id="${AGENT_ID}"></elevenlabs-convai>
-                    <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
-                  `
-                }}
-              />
+
+            {/* Transcript */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-2" style={{ maxHeight: '400px' }}>
+              {messages.length === 0 && (
+                <div className="text-center text-gray-400 text-sm mt-10">
+                  <p>대화가 시작되면 여기에 트랜스크립트가 표시됩니다.</p>
+                  <p className="mt-1">마이크가 켜져 있는지 확인해주세요.</p>
+                </div>
+              )}
+              {messages.map((msg, i) => {
+                const ps = getPersonaStyle(msg)
+                return (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 border ${
+                      msg.role === 'user'
+                        ? 'bg-brand-500 text-white border-brand-500'
+                        : msg.role === 'system'
+                        ? 'bg-red-50 text-red-600 border-red-200'
+                        : `${ps.bg} ${ps.border} ${ps.text}`
+                    }`}>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        {msg.role === 'agent' && ps && (
+                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${ps.badge}`}>
+                            {ps.label}
+                          </span>
+                        )}
+                        {msg.role === 'user' && (
+                          <span className="text-xs font-medium text-blue-100">나 (조정인)</span>
+                        )}
+                        {msg.role === 'system' && (
+                          <span className="text-xs font-medium text-red-400">시스템</span>
+                        )}
+                        <span className={`text-xs ${
+                          msg.role === 'user' ? 'text-blue-200' : 'text-gray-400'
+                        }`}>{msg.time}</span>
+                      </div>
+                      <p className="text-sm leading-relaxed">{msg.text}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Voice Indicator */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-center gap-3">
+              {status === 'listening' ? (
+                <>
+                  <div className="flex gap-1 items-center">
+                    <div className="w-1 h-4 bg-green-400 rounded-full animate-pulse" />
+                    <div className="w-1 h-6 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }} />
+                    <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <div className="w-1 h-5 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.15s' }} />
+                    <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.25s' }} />
+                  </div>
+                  <span className="text-sm text-green-600">말씀하세요...</span>
+                </>
+              ) : status === 'speaking' ? (
+                <>
+                  <div className="flex gap-1 items-center">
+                    <div className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" />
+                    <div className="w-1 h-5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }} />
+                    <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <div className="w-1 h-6 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.15s' }} />
+                    <div className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.25s' }} />
+                  </div>
+                  <span className="text-sm text-blue-600">AI가 말하는 중...</span>
+                </>
+              ) : (
+                <span className="text-sm text-gray-400">음성 대화 준비 중...</span>
+              )}
             </div>
           </div>
         ) : (
@@ -346,13 +582,27 @@ function TrainTab({ user, setTab }) {
 }
 
 // ─── Feedback ───
-function FeedbackTab({ user }) {
-  const [sessionId, setSessionId] = useState('')
+function FeedbackTab({ user, initialSessionId }) {
+  const [sessionId, setSessionId] = useState(initialSessionId || '')
   const [feedback, setFeedback] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  // Auto-generate feedback when coming from training tab
+  useEffect(() => {
+    if (initialSessionId && initialSessionId !== sessionId) {
+      setSessionId(initialSessionId)
+    }
+  }, [initialSessionId])
+
+  useEffect(() => {
+    if (initialSessionId && !feedback && !loading) {
+      generateFeedback()
+    }
+  }, [initialSessionId])
+
   const generateFeedback = async () => {
-    if (!sessionId.trim()) return alert('세션 ID를 입력해주세요.')
+    const sid = sessionId || initialSessionId
+    if (!sid?.trim()) return alert('세션 ID를 입력해주세요.')
     setLoading(true)
     try {
       const data = await api('/api/feedback/generate', {
@@ -413,6 +663,14 @@ function FeedbackTab({ user }) {
       {/* Feedback Result */}
       {feedback && (
         <div className="space-y-4">
+          {/* Demo Notice */}
+          {feedback.demo_notice && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3 items-start">
+              <span className="text-amber-500 text-lg shrink-0">&#9888;</span>
+              <p className="text-sm text-amber-700">{feedback.demo_notice}</p>
+            </div>
+          )}
+
           {/* Scores */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
             <h3 className="font-semibold text-gray-900">역량 평가 (10점 만점)</h3>
@@ -478,6 +736,7 @@ function FeedbackTab({ user }) {
 export default function Home() {
   const [tab, setTab] = useState('home')
   const [user, setUser] = useState(null)
+  const [lastSessionId, setLastSessionId] = useState(null)
 
   return (
     <>
@@ -485,8 +744,8 @@ export default function Home() {
       <main className="pb-20 px-4">
         {tab === 'home' && <HomeTab user={user} setUser={setUser} setTab={setTab} />}
         {tab === 'dashboard' && <DashboardTab user={user} />}
-        {tab === 'train' && <TrainTab user={user} setTab={setTab} />}
-        {tab === 'feedback' && <FeedbackTab user={user} />}
+        {tab === 'train' && <TrainTab user={user} setTab={setTab} onSessionEnd={setLastSessionId} />}
+        {tab === 'feedback' && <FeedbackTab user={user} initialSessionId={lastSessionId} />}
       </main>
       <footer className="fixed bottom-0 w-full bg-white border-t border-gray-100 py-3 text-center text-xs text-gray-400">
         Wing Mediator v0.1 — Powered by Trinos × KCAB
