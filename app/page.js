@@ -3,7 +3,181 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const API_BASE = 'https://wmediator.trinos.group'
+
+// Same agent, language passed via overrides
 const AGENT_ID = 'agent_1201km3k1xa0ee0bc2j2zdpp5rr6'
+
+// ─── i18n ───
+const T = {
+  ko: {
+    brand: 'Wing Mediator',
+    subtitle: 'AI 기반 실전 조정 역량 훈련 시스템',
+    partner: '대한상사중재원(KCAB) × Trinos',
+    tabs: { home: '홈', dashboard: '대시보드', train: '훈련 시작', feedback: '피드백' },
+    login: {
+      welcome: (name) => `환영합니다, ${name}님`,
+      startPrompt: 'AI 조정 훈련을 시작하세요',
+      startBtn: '훈련 시작하기',
+      nameLabel: '이름',
+      namePlaceholder: '홍길동',
+      emailLabel: '이메일',
+      emailPlaceholder: 'hong@example.com',
+      submit: '시작하기',
+      submitting: '등록 중...',
+      loginFirst: '먼저 로그인해주세요.',
+      registerFail: '등록 실패',
+      serverError: '서버 연결 오류',
+    },
+    dash: {
+      title: '대시보드',
+      remaining: '잔여 시간',
+      used: '사용 시간',
+      total: '총 배정',
+      monthUsage: '이번 달 사용량',
+      recentSessions: '최근 세션',
+      noSessions: '아직 세션이 없습니다. 훈련을 시작해보세요!',
+      training: '조정 훈련',
+      completed: '완료',
+      inProgress: '진행중',
+      min: '분',
+      loading: '로딩 중...',
+    },
+    train: {
+      title: '조정 훈련',
+      endBtn: '훈련 종료',
+      startBtn: '세션 시작',
+      connecting: '연결 중...',
+      ready: 'AI 조정 훈련 준비 완료',
+      readyDesc: '"세션 시작" 버튼을 누르면 AI 조정 상대방과 실전 시뮬레이션이 시작됩니다.',
+      scenarios: '5가지 시나리오',
+      scenarioDesc: '건설, 금융, 노동, 지식재산, 국제분쟁',
+      difficulty: '3단계 난이도',
+      difficultyDesc: '초급 → 중급 → 고급',
+      coaching: 'AI 코칭',
+      coachingDesc: '대화 종료 후 즉시 피드백',
+      transcriptWait: '대화가 시작되면 여기에 트랜스크립트가 표시됩니다.',
+      micCheck: '마이크가 켜져 있는지 확인해주세요.',
+      micError: '연결 오류가 발생했습니다. 마이크 접근을 허용했는지 확인해주세요.',
+      micAlert: '연결 오류: 마이크 접근을 허용해주세요.',
+      noTime: '이번 달 사용 시간이 소진되었습니다.',
+      sessionFail: '세션 시작 실패',
+      me: '나 (조정인)',
+      system: '시스템',
+      status: { idle: '대기', connecting: '연결 중...', connected: '연결됨', speaking: 'AI 발화 중', listening: '듣는 중...' },
+      speak: '말씀하세요...',
+      aiSpeaking: 'AI가 말하는 중...',
+      preparing: '음성 대화 준비 중...',
+    },
+    feedback: {
+      title: 'AI 코칭 피드백',
+      sessionId: '세션 ID',
+      generate: '피드백 생성',
+      generating: '분석 중...',
+      enterSession: '세션 ID를 입력해주세요.',
+      fail: '피드백 생성 실패',
+      scores: '역량 평가 (10점 만점)',
+      listening: '경청',
+      questioning: '질문',
+      empathy: '공감',
+      interests: '이해관계',
+      resolution: '해결',
+      strengths: '강점',
+      improvements: '개선점',
+      techniques: '추천 조정 기법',
+      overall: '종합 평가',
+    },
+    personas: {
+      facilitator: '[진행]',
+      applicant: '[신청인]',
+      respondent: '[피신청인]',
+      coach: '[코치]',
+    },
+  },
+  en: {
+    brand: 'Wing Mediator',
+    subtitle: 'AI-Powered Negotiation & Mediation Training',
+    partner: 'Trinos AI',
+    tabs: { home: 'Home', dashboard: 'Dashboard', train: 'Training', feedback: 'Feedback' },
+    login: {
+      welcome: (name) => `Welcome, ${name}`,
+      startPrompt: 'Start your AI negotiation training',
+      startBtn: 'Start Training',
+      nameLabel: 'Name',
+      namePlaceholder: 'John Doe',
+      emailLabel: 'Email',
+      emailPlaceholder: 'john@example.com',
+      submit: 'Get Started',
+      submitting: 'Registering...',
+      loginFirst: 'Please log in first.',
+      registerFail: 'Registration failed',
+      serverError: 'Server connection error',
+    },
+    dash: {
+      title: 'Dashboard',
+      remaining: 'Remaining',
+      used: 'Used',
+      total: 'Allocated',
+      monthUsage: 'Monthly Usage',
+      recentSessions: 'Recent Sessions',
+      noSessions: 'No sessions yet. Start your first training!',
+      training: 'Negotiation Training',
+      completed: 'Done',
+      inProgress: 'Active',
+      min: 'min',
+      loading: 'Loading...',
+    },
+    train: {
+      title: 'Negotiation Training',
+      endBtn: 'End Session',
+      startBtn: 'Start Session',
+      connecting: 'Connecting...',
+      ready: 'AI Training Ready',
+      readyDesc: 'Press "Start Session" to begin a real-time simulation with an AI counterpart.',
+      scenarios: '5 Scenarios',
+      scenarioDesc: 'Commercial, Employment, Partnership, Real Estate, Medical',
+      difficulty: '3 Levels',
+      difficultyDesc: 'Beginner → Intermediate → Advanced',
+      coaching: 'AI Coaching',
+      coachingDesc: 'Instant feedback after each session',
+      transcriptWait: 'Transcript will appear here once the conversation starts.',
+      micCheck: 'Please make sure your microphone is enabled.',
+      micError: 'Connection error. Please allow microphone access.',
+      micAlert: 'Connection error: Please allow microphone access.',
+      noTime: 'Your monthly usage limit has been reached.',
+      sessionFail: 'Failed to start session',
+      me: 'Me (Mediator)',
+      system: 'System',
+      status: { idle: 'Idle', connecting: 'Connecting...', connected: 'Connected', speaking: 'AI Speaking', listening: 'Listening...' },
+      speak: 'Speak now...',
+      aiSpeaking: 'AI is speaking...',
+      preparing: 'Preparing voice session...',
+    },
+    feedback: {
+      title: 'AI Coaching Feedback',
+      sessionId: 'Session ID',
+      generate: 'Generate Feedback',
+      generating: 'Analyzing...',
+      enterSession: 'Please enter a session ID.',
+      fail: 'Failed to generate feedback',
+      scores: 'Competency Scores (out of 10)',
+      listening: 'Listening',
+      questioning: 'Questioning',
+      empathy: 'Empathy',
+      interests: 'Interests',
+      resolution: 'Resolution',
+      strengths: 'Strengths',
+      improvements: 'Areas for Improvement',
+      techniques: 'Recommended Techniques',
+      overall: 'Overall Assessment',
+    },
+    personas: {
+      facilitator: '[Facilitator]',
+      applicant: '[Claimant]',
+      respondent: '[Respondent]',
+      coach: '[Coach]',
+    },
+  },
+}
 
 // ─── API helpers ───
 async function api(path, options = {}) {
@@ -14,13 +188,38 @@ async function api(path, options = {}) {
   return res.json()
 }
 
+// ─── Language Switcher ───
+function LangSwitch({ lang, setLang }) {
+  return (
+    <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+      <button
+        onClick={() => setLang('ko')}
+        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+          lang === 'ko' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        한국어
+      </button>
+      <button
+        onClick={() => setLang('en')}
+        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+          lang === 'en' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        EN
+      </button>
+    </div>
+  )
+}
+
 // ─── Nav ───
-function Nav({ tab, setTab, user }) {
+function Nav({ tab, setTab, user, lang, setLang }) {
+  const t = T[lang]
   const tabs = [
-    { id: 'home', label: '홈' },
-    { id: 'dashboard', label: '대시보드' },
-    { id: 'train', label: '훈련 시작' },
-    { id: 'feedback', label: '피드백' },
+    { id: 'home', label: t.tabs.home },
+    { id: 'dashboard', label: t.tabs.dashboard },
+    { id: 'train', label: t.tabs.train },
+    { id: 'feedback', label: t.tabs.feedback },
   ]
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -29,33 +228,36 @@ function Nav({ tab, setTab, user }) {
           <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">W</span>
           </div>
-          <span className="font-bold text-lg text-brand-700">Wing Mediator</span>
+          <span className="font-bold text-lg text-brand-700">{t.brand}</span>
         </div>
         <nav className="flex gap-1">
-          {tabs.map(t => (
+          {tabs.map(tb => (
             <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
+              key={tb.id}
+              onClick={() => setTab(tb.id)}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                tab === t.id
+                tab === tb.id
                   ? 'bg-brand-50 text-brand-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {t.label}
+              {tb.label}
             </button>
           ))}
         </nav>
-        {user && (
-          <span className="text-sm text-gray-500">{user.name}</span>
-        )}
+        <div className="flex items-center gap-3">
+          <LangSwitch lang={lang} setLang={setLang} />
+          {user && <span className="text-sm text-gray-500">{user.name}</span>}
+        </div>
       </div>
     </header>
   )
 }
 
 // ─── Home / Login ───
-function HomeTab({ user, setUser, setTab }) {
+function HomeTab({ user, setUser, setTab, lang }) {
+  const t = T[lang].login
+  const tb = T[lang]
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -72,10 +274,10 @@ function HomeTab({ user, setUser, setTab }) {
         setUser({ id: data.user_id, name: data.name, email: data.email })
         setTab('dashboard')
       } else {
-        alert(data.error || '등록 실패')
+        alert(data.error || t.registerFail)
       }
     } catch (err) {
-      alert('서버 연결 오류')
+      alert(t.serverError)
     }
     setLoading(false)
   }
@@ -83,13 +285,13 @@ function HomeTab({ user, setUser, setTab }) {
   if (user) {
     return (
       <div className="max-w-2xl mx-auto mt-20 text-center">
-        <h1 className="text-3xl font-bold text-brand-700 mb-4">환영합니다, {user.name}님</h1>
-        <p className="text-gray-500 mb-8">AI 조정 훈련을 시작하세요</p>
+        <h1 className="text-3xl font-bold text-brand-700 mb-4">{t.welcome(user.name)}</h1>
+        <p className="text-gray-500 mb-8">{t.startPrompt}</p>
         <button
           onClick={() => setTab('train')}
           className="px-8 py-3 bg-brand-500 text-white rounded-xl font-semibold hover:bg-brand-600 transition-colors"
         >
-          훈련 시작하기
+          {t.startBtn}
         </button>
       </div>
     )
@@ -101,30 +303,30 @@ function HomeTab({ user, setUser, setTab }) {
         <div className="w-16 h-16 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <span className="text-white font-bold text-2xl">W</span>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Wing Mediator</h1>
-        <p className="text-gray-500">AI 기반 실전 조정 역량 훈련 시스템</p>
-        <p className="text-sm text-gray-400 mt-1">대한상사중재원(KCAB) × Trinos</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{tb.brand}</h1>
+        <p className="text-gray-500">{tb.subtitle}</p>
+        <p className="text-sm text-gray-400 mt-1">{tb.partner}</p>
       </div>
       <form onSubmit={handleRegister} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t.nameLabel}</label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
             required
-            placeholder="홍길동"
+            placeholder={t.namePlaceholder}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t.emailLabel}</label>
           <input
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            placeholder="hong@example.com"
+            placeholder={t.emailPlaceholder}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition"
           />
         </div>
@@ -133,7 +335,7 @@ function HomeTab({ user, setUser, setTab }) {
           disabled={loading}
           className="w-full py-3 bg-brand-500 text-white rounded-xl font-semibold hover:bg-brand-600 disabled:opacity-50 transition-colors"
         >
-          {loading ? '등록 중...' : '시작하기'}
+          {loading ? t.submitting : t.submit}
         </button>
       </form>
     </div>
@@ -141,7 +343,9 @@ function HomeTab({ user, setUser, setTab }) {
 }
 
 // ─── Dashboard ───
-function DashboardTab({ user }) {
+function DashboardTab({ user, lang }) {
+  const t = T[lang].dash
+  const tl = T[lang].login
   const [usage, setUsage] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -153,69 +357,63 @@ function DashboardTab({ user }) {
     }).catch(() => setLoading(false))
   }, [user])
 
-  if (!user) return <p className="text-center mt-20 text-gray-500">먼저 로그인해주세요.</p>
-  if (loading) return <p className="text-center mt-20 text-gray-400">로딩 중...</p>
+  if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
+  if (loading) return <p className="text-center mt-20 text-gray-400">{t.loading}</p>
 
   const pct = usage ? Math.round((usage.minutes_used / usage.minutes_allocated) * 100) : 0
 
   return (
     <div className="max-w-3xl mx-auto mt-10 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">대시보드</h2>
+      <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
 
-      {/* Usage Cards */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500 mb-1">잔여 시간</p>
-          <p className="text-3xl font-bold text-brand-500">{usage?.minutes_remaining ?? '-'}분</p>
+          <p className="text-sm text-gray-500 mb-1">{t.remaining}</p>
+          <p className="text-3xl font-bold text-brand-500">{usage?.minutes_remaining ?? '-'}{t.min}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500 mb-1">사용 시간</p>
-          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_used ?? 0}분</p>
+          <p className="text-sm text-gray-500 mb-1">{t.used}</p>
+          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_used ?? 0}{t.min}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500 mb-1">총 배정</p>
-          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_allocated ?? 60}분</p>
+          <p className="text-sm text-gray-500 mb-1">{t.total}</p>
+          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_allocated ?? 60}{t.min}</p>
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-gray-500">이번 달 사용량</span>
+          <span className="text-gray-500">{t.monthUsage}</span>
           <span className="font-medium text-gray-700">{pct}%</span>
         </div>
         <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-brand-500 rounded-full transition-all duration-500"
-            style={{ width: `${pct}%` }}
-          />
+          <div className="h-full bg-brand-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
-      {/* Session History */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">최근 세션</h3>
+        <h3 className="font-semibold text-gray-900 mb-4">{t.recentSessions}</h3>
         {usage?.sessions?.length > 0 ? (
           <div className="space-y-3">
             {usage.sessions.map((s, i) => (
               <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
                 <div>
-                  <p className="font-medium text-gray-800">{s.scenario_title || '조정 훈련'}</p>
-                  <p className="text-sm text-gray-400">{s.started_at ? new Date(s.started_at).toLocaleString('ko-KR') : '-'}</p>
+                  <p className="font-medium text-gray-800">{s.scenario_title || t.training}</p>
+                  <p className="text-sm text-gray-400">{s.started_at ? new Date(s.started_at).toLocaleString(lang === 'ko' ? 'ko-KR' : 'en-US') : '-'}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-gray-700">{s.duration_minutes ?? '-'}분</p>
+                  <p className="font-medium text-gray-700">{s.duration_minutes ?? '-'}{t.min}</p>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     s.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
                   }`}>
-                    {s.status === 'completed' ? '완료' : '진행중'}
+                    {s.status === 'completed' ? t.completed : t.inProgress}
                   </span>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 text-sm">아직 세션이 없습니다. 훈련을 시작해보세요!</p>
+          <p className="text-gray-400 text-sm">{t.noSessions}</p>
         )}
       </div>
     </div>
@@ -223,160 +421,125 @@ function DashboardTab({ user }) {
 }
 
 // ─── Persona config ───
-const PERSONAS = {
-  facilitator: { label: '[진행]', color: 'purple', bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-600' },
-  applicant:   { label: '[신청인]', color: 'blue', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-600' },
-  respondent:  { label: '[피신청인]', color: 'orange', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-600' },
-  coach:       { label: '[코치]', color: 'green', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-100 text-green-600' },
-  unknown:     { label: 'AI', color: 'gray', bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-700', badge: 'bg-gray-200 text-gray-600' },
+function getPersonas(lang) {
+  const p = T[lang].personas
+  return {
+    facilitator: { label: p.facilitator, bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-600' },
+    applicant:   { label: p.applicant, bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-600' },
+    respondent:  { label: p.respondent, bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-600' },
+    coach:       { label: p.coach, bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-100 text-green-600' },
+    unknown:     { label: 'AI', bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-700', badge: 'bg-gray-200 text-gray-600' },
+  }
 }
 
-// Detect persona from XML-like tags or Korean bracket markers
 function detectPersona(text) {
-  const lower = text.toLowerCase()
-  // XML tags: <Applicant>, <Facilitator>, <Respondent>, <Coach>
-  if (/<facilitator>|<진행>/i.test(text) || /\[진행\]/i.test(text)) return 'facilitator'
-  if (/<applicant>|<신청인>/i.test(text) || /\[신청인\]/i.test(text)) return 'applicant'
-  if (/<respondent>|<피신청인>/i.test(text) || /\[피신청인\]/i.test(text)) return 'respondent'
-  if (/<coach>|<코치>/i.test(text) || /\[코치\]/i.test(text)) return 'coach'
+  if (/<facilitator>|<진행>/i.test(text) || /\[진행\]|\[Facilitator\]/i.test(text)) return 'facilitator'
+  if (/<applicant>|<신청인>|<claimant>/i.test(text) || /\[신청인\]|\[Claimant\]|\[Applicant\]/i.test(text)) return 'applicant'
+  if (/<respondent>|<피신청인>/i.test(text) || /\[피신청인\]|\[Respondent\]/i.test(text)) return 'respondent'
+  if (/<coach>|<코치>/i.test(text) || /\[코치\]|\[Coach\]/i.test(text)) return 'coach'
   return 'unknown'
 }
 
-// Strip emotion tags, persona XML tags, and bracket markers
 function cleanText(text) {
   return text
-    // Remove emotion tags: [excited], [sad], [angry], [happy], [neutral], [curious], etc.
     .replace(/\[(excited|sad|angry|happy|neutral|curious|surprised|worried|calm|frustrated|hopeful|disappointed|empathetic|assertive|confused|relieved|tense|anxious)\]/gi, '')
-    // Remove XML persona tags: <Applicant>, </Applicant>, <Facilitator>, etc.
-    .replace(/<\/?(Applicant|Facilitator|Respondent|Coach|신청인|피신청인|진행|코치)>/gi, '')
-    // Remove Korean bracket persona markers: [진행], [신청인], [피신청인], [코치]
-    .replace(/\[(진행|신청인|피신청인|코치)\]/g, '')
-    // Clean up extra whitespace
+    .replace(/<\/?(Applicant|Facilitator|Respondent|Coach|Claimant|신청인|피신청인|진행|코치)>/gi, '')
+    .replace(/\[(진행|신청인|피신청인|코치|Facilitator|Claimant|Applicant|Respondent|Coach)\]/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
 }
 
-// Split text into sentences (Korean + English aware)
 function splitSentences(text) {
-  // Split on sentence-ending punctuation followed by space or end
   const raw = text.match(/[^.!?。]*[.!?。]+[\s]?|[^.!?。]+$/g)
   if (!raw || raw.length <= 1) return [text]
   return raw.map(s => s.trim()).filter(s => s.length > 0)
 }
 
 // ─── Training ───
-function TrainTab({ user, setTab, onSessionEnd }) {
+function TrainTab({ user, setTab, onSessionEnd, lang }) {
+  const t = T[lang].train
+  const tl = T[lang].login
+  const PERSONAS = getPersonas(lang)
   const [sessionId, setSessionId] = useState(null)
   const [active, setActive] = useState(false)
   const [starting, setStarting] = useState(false)
   const [messages, setMessages] = useState([])
-  const [status, setStatus] = useState('idle') // idle, connecting, connected, speaking, listening
+  const [status, setStatus] = useState('idle')
   const conversationRef = useRef(null)
   const scrollRef = useRef(null)
-  const timerRefs = useRef([]) // track sentence timers for cleanup
+  const timerRefs = useRef([])
 
-  // Auto-scroll transcript
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages])
 
-  // Cleanup timers on unmount
   useEffect(() => {
     return () => timerRefs.current.forEach(t => clearTimeout(t))
   }, [])
 
-  // Add a single message bubble
   const addMessage = useCallback((role, text, persona = 'unknown') => {
     const cleaned = cleanText(text)
     if (!cleaned) return
     setMessages(prev => [...prev, {
-      role,
-      text: cleaned,
-      persona,
-      time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+      role, text: cleaned, persona,
+      time: new Date().toLocaleTimeString(lang === 'ko' ? 'ko-KR' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
     }])
-  }, [])
+  }, [lang])
 
-  // Stream AI message sentence by sentence
   const streamSentences = useCallback((fullText) => {
     const persona = detectPersona(fullText)
     const cleaned = cleanText(fullText)
     if (!cleaned) return
-
     const sentences = splitSentences(cleaned)
-
-    if (sentences.length <= 1) {
-      addMessage('agent', cleaned, persona)
-      return
-    }
-
+    if (sentences.length <= 1) { addMessage('agent', cleaned, persona); return }
     sentences.forEach((sentence, idx) => {
-      const timer = setTimeout(() => {
-        addMessage('agent', sentence, persona)
-      }, idx * 600) // 600ms between each sentence
+      const timer = setTimeout(() => addMessage('agent', sentence, persona), idx * 600)
       timerRefs.current.push(timer)
     })
   }, [addMessage])
 
   const startSession = async () => {
-    if (!user) return alert('먼저 로그인해주세요.')
+    if (!user) return alert(tl.loginFirst)
     setStarting(true)
     try {
-      // 1. Register session with Workers API
       const data = await api('/api/session/start', {
         method: 'POST',
         body: JSON.stringify({ user_id: user.id }),
       })
-      if (!data.success) {
-        alert(data.error || '세션 시작 실패')
-        setStarting(false)
-        return
-      }
-      if (data.remaining_minutes <= 0) {
-        alert('이번 달 사용 시간이 소진되었습니다.')
-        setStarting(false)
-        return
-      }
+      if (!data.success) { alert(data.error || t.sessionFail); setStarting(false); return }
+      if (data.remaining_minutes <= 0) { alert(t.noTime); setStarting(false); return }
       setSessionId(data.session_id)
       setMessages([])
       setStatus('connecting')
       timerRefs.current = []
 
-      // 2. Start ElevenLabs conversation
       const { Conversation } = await import('@11labs/client')
       const conversation = await Conversation.startSession({
         agentId: AGENT_ID,
-        onConnect: () => {
-          setStatus('connected')
-          setActive(true)
+        overrides: {
+          agent: {
+            language: lang === 'en' ? 'en' : 'ko',
+            firstMessage: lang === 'en'
+              ? 'Hello, welcome to the Wing Mediator negotiation simulator. Please choose a scenario and difficulty level. Scenarios: 1. Construction defect dispute. 2. Wage dispute. 3. Partnership dissolution. 4. Real estate dispute. 5. Medical expense dispute. 6. Custom scenario. Difficulty: Beginner, Intermediate, or Advanced. Please say the number and difficulty.'
+              : undefined,
+          },
         },
-        onDisconnect: () => {
-          setStatus('idle')
-        },
+        onConnect: () => { setStatus('connected'); setActive(true) },
+        onDisconnect: () => { setStatus('idle') },
         onMessage: ({ message, source }) => {
-          if (source === 'ai') {
-            // AI messages: detect persona, strip tags, stream sentences
-            streamSentences(message)
-          } else {
-            // User messages: just clean and add
-            addMessage('user', message, 'user')
-          }
+          if (source === 'ai') { streamSentences(message) }
+          else { addMessage('user', message, 'user') }
         },
-        onModeChange: ({ mode }) => {
-          setStatus(mode === 'speaking' ? 'speaking' : 'listening')
-        },
+        onModeChange: ({ mode }) => { setStatus(mode === 'speaking' ? 'speaking' : 'listening') },
         onError: (error) => {
           console.error('ElevenLabs error:', error)
-          addMessage('system', '연결 오류가 발생했습니다. 마이크 접근을 허용했는지 확인해주세요.', 'system')
+          addMessage('system', t.micError, 'system')
         },
       })
       conversationRef.current = conversation
-
     } catch (err) {
       console.error('Start error:', err)
-      alert('연결 오류: 마이크 접근을 허용해주세요.')
+      alert(t.micAlert)
       setStatus('idle')
     }
     setStarting(false)
@@ -384,106 +547,70 @@ function TrainTab({ user, setTab, onSessionEnd }) {
 
   const endSession = async () => {
     const endedId = sessionId
-    // Clear pending sentence timers
     timerRefs.current.forEach(t => clearTimeout(t))
     timerRefs.current = []
-    // End ElevenLabs conversation
     if (conversationRef.current) {
-      try {
-        await conversationRef.current.endSession()
-      } catch (e) { /* ignore */ }
+      try { await conversationRef.current.endSession() } catch (e) {}
       conversationRef.current = null
     }
-    // End API session
     if (endedId) {
-      await api('/api/session/end', {
-        method: 'POST',
-        body: JSON.stringify({ session_id: endedId }),
-      })
+      await api('/api/session/end', { method: 'POST', body: JSON.stringify({ session_id: endedId }) })
     }
-    setActive(false)
-    setSessionId(null)
-    setStatus('idle')
+    setActive(false); setSessionId(null); setStatus('idle')
     if (onSessionEnd) onSessionEnd(endedId)
     setTab('feedback')
   }
 
-  const statusLabel = {
-    idle: { text: '대기', color: 'gray' },
-    connecting: { text: '연결 중...', color: 'yellow' },
-    connected: { text: '연결됨', color: 'green' },
-    speaking: { text: 'AI 발화 중', color: 'blue' },
-    listening: { text: '듣는 중...', color: 'green' },
-  }[status] || { text: status, color: 'gray' }
-
-  // Get persona style for a message
+  const statusLabel = t.status[status] || status
   const getPersonaStyle = (msg) => {
-    if (msg.role === 'user') return null
-    if (msg.role === 'system') return null
+    if (msg.role === 'user' || msg.role === 'system') return null
     return PERSONAS[msg.persona] || PERSONAS.unknown
   }
 
-  if (!user) return <p className="text-center mt-20 text-gray-500">먼저 로그인해주세요.</p>
+  if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
 
   return (
     <div className="max-w-4xl mx-auto mt-10">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">조정 훈련</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
         {active ? (
-          <button
-            onClick={endSession}
-            className="px-5 py-2 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors"
-          >
-            훈련 종료
-          </button>
+          <button onClick={endSession} className="px-5 py-2 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors">{t.endBtn}</button>
         ) : (
-          <button
-            onClick={startSession}
-            disabled={starting}
-            className="px-5 py-2 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
-          >
-            {starting ? '연결 중...' : '세션 시작'}
+          <button onClick={startSession} disabled={starting} className="px-5 py-2 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors">
+            {starting ? t.connecting : t.startBtn}
           </button>
         )}
       </div>
 
-      {/* Persona Legend */}
       {active && (
         <div className="flex gap-2 mb-3 flex-wrap">
           {Object.entries(PERSONAS).filter(([k]) => k !== 'unknown').map(([key, p]) => (
-            <span key={key} className={`text-xs px-2.5 py-1 rounded-full ${p.badge} font-medium`}>
-              {p.label}
-            </span>
+            <span key={key} className={`text-xs px-2.5 py-1 rounded-full ${p.badge} font-medium`}>{p.label}</span>
           ))}
-          <span className="text-xs px-2.5 py-1 rounded-full bg-brand-100 text-brand-600 font-medium">나 (조정인)</span>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-brand-100 text-brand-600 font-medium">{t.me}</span>
         </div>
       )}
 
-      {/* Training Area */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden" style={{ minHeight: '500px' }}>
         {active ? (
           <div className="flex flex-col h-full" style={{ minHeight: '500px' }}>
-            {/* Status Bar */}
             <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-100 bg-gray-50">
               <div className={`w-3 h-3 rounded-full ${
                 status === 'speaking' ? 'bg-blue-400 animate-pulse' :
-                status === 'listening' ? 'bg-green-400 animate-pulse' :
-                'bg-yellow-400'
+                status === 'listening' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'
               }`} />
               <span className={`text-sm font-medium ${
                 status === 'speaking' ? 'text-blue-600' :
-                status === 'listening' ? 'text-green-600' :
-                'text-yellow-600'
-              }`}>{statusLabel.text}</span>
+                status === 'listening' ? 'text-green-600' : 'text-yellow-600'
+              }`}>{statusLabel}</span>
               {sessionId && <span className="text-xs text-gray-400 ml-auto">ID: {sessionId.slice(0, 12)}...</span>}
             </div>
 
-            {/* Transcript */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-2" style={{ maxHeight: '400px' }}>
               {messages.length === 0 && (
                 <div className="text-center text-gray-400 text-sm mt-10">
-                  <p>대화가 시작되면 여기에 트랜스크립트가 표시됩니다.</p>
-                  <p className="mt-1">마이크가 켜져 있는지 확인해주세요.</p>
+                  <p>{t.transcriptWait}</p>
+                  <p className="mt-1">{t.micCheck}</p>
                 </div>
               )}
               {messages.map((msg, i) => {
@@ -491,27 +618,17 @@ function TrainTab({ user, setTab, onSessionEnd }) {
                 return (
                   <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 border ${
-                      msg.role === 'user'
-                        ? 'bg-brand-500 text-white border-brand-500'
-                        : msg.role === 'system'
-                        ? 'bg-red-50 text-red-600 border-red-200'
+                      msg.role === 'user' ? 'bg-brand-500 text-white border-brand-500'
+                        : msg.role === 'system' ? 'bg-red-50 text-red-600 border-red-200'
                         : `${ps.bg} ${ps.border} ${ps.text}`
                     }`}>
                       <div className="flex items-center gap-2 mb-0.5">
                         {msg.role === 'agent' && ps && (
-                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${ps.badge}`}>
-                            {ps.label}
-                          </span>
+                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${ps.badge}`}>{ps.label}</span>
                         )}
-                        {msg.role === 'user' && (
-                          <span className="text-xs font-medium text-blue-100">나 (조정인)</span>
-                        )}
-                        {msg.role === 'system' && (
-                          <span className="text-xs font-medium text-red-400">시스템</span>
-                        )}
-                        <span className={`text-xs ${
-                          msg.role === 'user' ? 'text-blue-200' : 'text-gray-400'
-                        }`}>{msg.time}</span>
+                        {msg.role === 'user' && <span className="text-xs font-medium text-blue-100">{t.me}</span>}
+                        {msg.role === 'system' && <span className="text-xs font-medium text-red-400">{t.system}</span>}
+                        <span className={`text-xs ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>{msg.time}</span>
                       </div>
                       <p className="text-sm leading-relaxed">{msg.text}</p>
                     </div>
@@ -520,32 +637,27 @@ function TrainTab({ user, setTab, onSessionEnd }) {
               })}
             </div>
 
-            {/* Voice Indicator */}
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-center gap-3">
               {status === 'listening' ? (
                 <>
                   <div className="flex gap-1 items-center">
-                    <div className="w-1 h-4 bg-green-400 rounded-full animate-pulse" />
-                    <div className="w-1 h-6 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }} />
-                    <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                    <div className="w-1 h-5 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.15s' }} />
-                    <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.25s' }} />
+                    {[4,6,3,5,3].map((h,i) => (
+                      <div key={i} className={`w-1 h-${h} bg-green-${i%2?5:4}00 rounded-full animate-pulse`} style={{ animationDelay: `${i*0.05+0.1}s` }} />
+                    ))}
                   </div>
-                  <span className="text-sm text-green-600">말씀하세요...</span>
+                  <span className="text-sm text-green-600">{t.speak}</span>
                 </>
               ) : status === 'speaking' ? (
                 <>
                   <div className="flex gap-1 items-center">
-                    <div className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" />
-                    <div className="w-1 h-5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }} />
-                    <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                    <div className="w-1 h-6 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.15s' }} />
-                    <div className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.25s' }} />
+                    {[3,5,4,6,3].map((h,i) => (
+                      <div key={i} className={`w-1 h-${h} bg-blue-${i%2?5:4}00 rounded-full animate-pulse`} style={{ animationDelay: `${i*0.05+0.1}s` }} />
+                    ))}
                   </div>
-                  <span className="text-sm text-blue-600">AI가 말하는 중...</span>
+                  <span className="text-sm text-blue-600">{t.aiSpeaking}</span>
                 </>
               ) : (
-                <span className="text-sm text-gray-400">음성 대화 준비 중...</span>
+                <span className="text-sm text-gray-400">{t.preparing}</span>
               )}
             </div>
           </div>
@@ -556,22 +668,20 @@ function TrainTab({ user, setTab, onSessionEnd }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">AI 조정 훈련 준비 완료</h3>
-            <p className="text-gray-500 mb-2 max-w-md">
-              "세션 시작" 버튼을 누르면 AI 조정 상대방과 실전 시뮬레이션이 시작됩니다.
-            </p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">{t.ready}</h3>
+            <p className="text-gray-500 mb-2 max-w-md">{t.readyDesc}</p>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-left max-w-lg">
               <div className="bg-gray-50 rounded-xl p-4">
-                <p className="font-medium text-gray-700 mb-1">5가지 시나리오</p>
-                <p className="text-gray-400 text-xs">건설, 금융, 노동, 지식재산, 국제분쟁</p>
+                <p className="font-medium text-gray-700 mb-1">{t.scenarios}</p>
+                <p className="text-gray-400 text-xs">{t.scenarioDesc}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-4">
-                <p className="font-medium text-gray-700 mb-1">3단계 난이도</p>
-                <p className="text-gray-400 text-xs">초급 → 중급 → 고급</p>
+                <p className="font-medium text-gray-700 mb-1">{t.difficulty}</p>
+                <p className="text-gray-400 text-xs">{t.difficultyDesc}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-4">
-                <p className="font-medium text-gray-700 mb-1">AI 코칭</p>
-                <p className="text-gray-400 text-xs">대화 종료 후 즉시 피드백</p>
+                <p className="font-medium text-gray-700 mb-1">{t.coaching}</p>
+                <p className="text-gray-400 text-xs">{t.coachingDesc}</p>
               </div>
             </div>
           </div>
@@ -582,88 +692,66 @@ function TrainTab({ user, setTab, onSessionEnd }) {
 }
 
 // ─── Feedback ───
-function FeedbackTab({ user, initialSessionId }) {
+function FeedbackTab({ user, initialSessionId, lang }) {
+  const t = T[lang].feedback
+  const tl = T[lang].login
   const [sessionId, setSessionId] = useState(initialSessionId || '')
   const [feedback, setFeedback] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  // Auto-generate feedback when coming from training tab
   useEffect(() => {
-    if (initialSessionId && initialSessionId !== sessionId) {
-      setSessionId(initialSessionId)
-    }
+    if (initialSessionId && initialSessionId !== sessionId) setSessionId(initialSessionId)
   }, [initialSessionId])
 
   useEffect(() => {
-    if (initialSessionId && !feedback && !loading) {
-      generateFeedback()
-    }
+    if (initialSessionId && !feedback && !loading) generateFeedback()
   }, [initialSessionId])
 
   const generateFeedback = async () => {
     const sid = sessionId || initialSessionId
-    if (!sid?.trim()) return alert('세션 ID를 입력해주세요.')
+    if (!sid?.trim()) return alert(t.enterSession)
     setLoading(true)
     try {
       const data = await api('/api/feedback/generate', {
         method: 'POST',
         body: JSON.stringify({ session_id: sessionId }),
       })
-      if (data.success) {
-        setFeedback(data.feedback)
-      } else {
-        alert(data.error || '피드백 생성 실패')
-      }
-    } catch (err) {
-      alert('서버 연결 오류')
-    }
+      if (data.success) { setFeedback(data.feedback) }
+      else { alert(data.error || t.fail) }
+    } catch (err) { alert(tl.serverError) }
     setLoading(false)
   }
 
   const ScoreBar = ({ label, score }) => (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-600 w-20 shrink-0">{label}</span>
+      <span className="text-sm text-gray-600 w-24 shrink-0">{label}</span>
       <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-brand-500 rounded-full transition-all duration-700"
-          style={{ width: `${score * 10}%` }}
-        />
+        <div className="h-full bg-brand-500 rounded-full transition-all duration-700" style={{ width: `${score * 10}%` }} />
       </div>
       <span className="text-sm font-semibold text-gray-700 w-8 text-right">{score}</span>
     </div>
   )
 
-  if (!user) return <p className="text-center mt-20 text-gray-500">먼저 로그인해주세요.</p>
+  if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
 
   return (
     <div className="max-w-3xl mx-auto mt-10 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">AI 코칭 피드백</h2>
+      <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
 
-      {/* Input */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">세션 ID</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">{t.sessionId}</label>
         <div className="flex gap-3">
-          <input
-            type="text"
-            value={sessionId}
-            onChange={e => setSessionId(e.target.value)}
-            placeholder="ses_..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
-          />
-          <button
-            onClick={generateFeedback}
-            disabled={loading}
-            className="px-6 py-3 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
-          >
-            {loading ? '분석 중...' : '피드백 생성'}
+          <input type="text" value={sessionId} onChange={e => setSessionId(e.target.value)}
+            placeholder="ses_..." className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+          <button onClick={generateFeedback} disabled={loading}
+            className="px-6 py-3 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors">
+            {loading ? t.generating : t.generate}
           </button>
         </div>
       </div>
 
-      {/* Feedback Result */}
       {feedback && (
         <div className="space-y-4">
-          {/* Demo Notice */}
           {feedback.demo_notice && (
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3 items-start">
               <span className="text-amber-500 text-lg shrink-0">&#9888;</span>
@@ -671,58 +759,48 @@ function FeedbackTab({ user, initialSessionId }) {
             </div>
           )}
 
-          {/* Scores */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-            <h3 className="font-semibold text-gray-900">역량 평가 (10점 만점)</h3>
-            <ScoreBar label="경청" score={feedback.scores?.listening ?? 0} />
-            <ScoreBar label="질문" score={feedback.scores?.questioning ?? 0} />
-            <ScoreBar label="공감" score={feedback.scores?.empathy ?? 0} />
-            <ScoreBar label="이해관계" score={feedback.scores?.interests ?? 0} />
-            <ScoreBar label="해결" score={feedback.scores?.resolution ?? 0} />
+            <h3 className="font-semibold text-gray-900">{t.scores}</h3>
+            <ScoreBar label={t.listening} score={feedback.scores?.listening ?? 0} />
+            <ScoreBar label={t.questioning} score={feedback.scores?.questioning ?? 0} />
+            <ScoreBar label={t.empathy} score={feedback.scores?.empathy ?? 0} />
+            <ScoreBar label={t.interests} score={feedback.scores?.interests ?? 0} />
+            <ScoreBar label={t.resolution} score={feedback.scores?.resolution ?? 0} />
           </div>
 
-          {/* Strengths & Improvements */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="font-semibold text-green-600 mb-3">강점</h3>
+              <h3 className="font-semibold text-green-600 mb-3">{t.strengths}</h3>
               <ul className="space-y-2">
                 {(feedback.strengths || []).map((s, i) => (
-                  <li key={i} className="text-sm text-gray-700 flex gap-2">
-                    <span className="text-green-500 shrink-0">✓</span> {s}
-                  </li>
+                  <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-green-500 shrink-0">✓</span> {s}</li>
                 ))}
               </ul>
             </div>
             <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="font-semibold text-amber-600 mb-3">개선점</h3>
+              <h3 className="font-semibold text-amber-600 mb-3">{t.improvements}</h3>
               <ul className="space-y-2">
                 {(feedback.improvements || []).map((s, i) => (
-                  <li key={i} className="text-sm text-gray-700 flex gap-2">
-                    <span className="text-amber-500 shrink-0">→</span> {s}
-                  </li>
+                  <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-amber-500 shrink-0">→</span> {s}</li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Techniques */}
           {feedback.techniques_available?.length > 0 && (
             <div className="bg-brand-50 rounded-2xl p-6">
-              <h3 className="font-semibold text-brand-700 mb-3">추천 조정 기법</h3>
+              <h3 className="font-semibold text-brand-700 mb-3">{t.techniques}</h3>
               <div className="flex flex-wrap gap-2">
-                {feedback.techniques_available.map((t, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-white text-brand-600 text-sm rounded-lg border border-brand-200">
-                    {t}
-                  </span>
+                {feedback.techniques_available.map((tc, i) => (
+                  <span key={i} className="px-3 py-1.5 bg-white text-brand-600 text-sm rounded-lg border border-brand-200">{tc}</span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Overall */}
           {feedback.overall && (
             <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">종합 평가</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t.overall}</h3>
               <p className="text-gray-600 text-sm leading-relaxed">{feedback.overall}</p>
             </div>
           )}
@@ -737,18 +815,19 @@ export default function Home() {
   const [tab, setTab] = useState('home')
   const [user, setUser] = useState(null)
   const [lastSessionId, setLastSessionId] = useState(null)
+  const [lang, setLang] = useState('ko')
 
   return (
     <>
-      <Nav tab={tab} setTab={setTab} user={user} />
+      <Nav tab={tab} setTab={setTab} user={user} lang={lang} setLang={setLang} />
       <main className="pb-20 px-4">
-        {tab === 'home' && <HomeTab user={user} setUser={setUser} setTab={setTab} />}
-        {tab === 'dashboard' && <DashboardTab user={user} />}
-        {tab === 'train' && <TrainTab user={user} setTab={setTab} onSessionEnd={setLastSessionId} />}
-        {tab === 'feedback' && <FeedbackTab user={user} initialSessionId={lastSessionId} />}
+        {tab === 'home' && <HomeTab user={user} setUser={setUser} setTab={setTab} lang={lang} />}
+        {tab === 'dashboard' && <DashboardTab user={user} lang={lang} />}
+        {tab === 'train' && <TrainTab user={user} setTab={setTab} onSessionEnd={setLastSessionId} lang={lang} />}
+        {tab === 'feedback' && <FeedbackTab user={user} initialSessionId={lastSessionId} lang={lang} />}
       </main>
       <footer className="fixed bottom-0 w-full bg-white border-t border-gray-100 py-3 text-center text-xs text-gray-400">
-        Wing Mediator v0.1 — Powered by Trinos × KCAB
+        Wing Mediator v0.1 — Powered by Trinos {lang === 'ko' ? '× KCAB' : 'AI'}
       </footer>
     </>
   )
