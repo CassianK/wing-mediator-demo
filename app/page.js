@@ -3,17 +3,53 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const API_BASE = 'https://wmediator.trinos.group'
-
-// Same agent, language passed via overrides
 const AGENT_ID = 'agent_1201km3k1xa0ee0bc2j2zdpp5rr6'
 
 // ─── i18n ───
 const T = {
   ko: {
     brand: 'Wing Mediator',
-    subtitle: 'AI 기반 실전 조정 역량 훈련 시스템',
-    partner: '대한상사중재원(KCAB) × Trinos',
-    tabs: { home: '홈', dashboard: '대시보드', train: '훈련 시작', feedback: '피드백' },
+    subtitle: 'AI 기반 실전 조정 역량 훈련',
+    partner: 'KCAB × Trinos',
+    tabs: { home: '홈', dashboard: '대시보드', train: '훈련', feedback: '피드백' },
+    hero: {
+      badge: 'AI-Powered Mediation Training',
+      headline1: '조정의 미래,',
+      headline2: 'AI와 함께 시작하세요',
+      desc: '대한상사중재원과 Trinos가 함께 만든 차세대 AI 조정 훈련 시스템. 실전과 동일한 시뮬레이션으로 조정 역량을 비약적으로 향상시키세요.',
+      cta: '무료로 시작하기',
+      ctaSub: '지금 바로 AI 조정 훈련을 체험하세요',
+      stats: [
+        { value: '5+', label: '시나리오' },
+        { value: '4', label: 'AI 페르소나' },
+        { value: '실시간', label: '음성 대화' },
+        { value: 'AI', label: '즉시 피드백' },
+      ],
+    },
+    features: {
+      title: '핵심 기능',
+      subtitle: '실전 조정 역량을 끌어올리는 AI 훈련',
+      items: [
+        { icon: '🎙️', title: '실시간 음성 대화', desc: 'ElevenLabs AI 음성 기술로 실제 조정 상황과 동일한 대화 경험을 제공합니다.' },
+        { icon: '🎭', title: '4가지 AI 페르소나', desc: '진행자, 신청인, 피신청인, 코치 — 각기 다른 성격과 전략으로 실전 시뮬레이션을 구현합니다.' },
+        { icon: '📊', title: 'AI 역량 분석', desc: '경청, 질문, 공감, 이해관계 파악, 해결능력까지 5개 핵심 역량을 정밀하게 분석합니다.' },
+        { icon: '🌐', title: '한국어 · 영어 지원', desc: '다국어 대응으로 국제 조정 역량까지 훈련할 수 있습니다.' },
+      ],
+    },
+    scenarios: {
+      title: '훈련 시나리오',
+      subtitle: '다양한 분쟁 유형을 실전처럼',
+      items: ['건설 분쟁', '금융 분쟁', '노동 분쟁', '지식재산 분쟁', '국제상사 분쟁'],
+    },
+    howItWorks: {
+      title: '이용 방법',
+      steps: [
+        { step: '01', title: '등록', desc: '이름과 이메일로 간편하게 시작' },
+        { step: '02', title: '시나리오 선택', desc: 'AI가 분쟁 상황을 설정' },
+        { step: '03', title: '실전 조정', desc: '음성으로 실시간 조정 진행' },
+        { step: '04', title: 'AI 피드백', desc: '역량 분석 및 개선점 제공' },
+      ],
+    },
     login: {
       welcome: (name) => `환영합니다, ${name}님`,
       startPrompt: 'AI 조정 훈련을 시작하세요',
@@ -27,6 +63,8 @@ const T = {
       loginFirst: '먼저 로그인해주세요.',
       registerFail: '등록 실패',
       serverError: '서버 연결 오류',
+      formTitle: '훈련 시작',
+      formDesc: '간편 등록 후 바로 AI 조정 훈련을 체험하세요.',
     },
     dash: {
       title: '대시보드',
@@ -98,6 +136,44 @@ const T = {
     subtitle: 'AI-Powered Negotiation & Mediation Training',
     partner: 'Trinos AI',
     tabs: { home: 'Home', dashboard: 'Dashboard', train: 'Training', feedback: 'Feedback' },
+    hero: {
+      badge: 'AI-Powered Mediation Training',
+      headline1: 'The Future of',
+      headline2: 'Mediation Training',
+      desc: 'Built by KCAB and Trinos, Wing Mediator delivers next-generation AI-powered simulation for real-world mediation skill development.',
+      cta: 'Get Started Free',
+      ctaSub: 'Experience AI mediation training now',
+      stats: [
+        { value: '5+', label: 'Scenarios' },
+        { value: '4', label: 'AI Personas' },
+        { value: 'Live', label: 'Voice Chat' },
+        { value: 'AI', label: 'Feedback' },
+      ],
+    },
+    features: {
+      title: 'Key Features',
+      subtitle: 'AI training that elevates your mediation skills',
+      items: [
+        { icon: '🎙️', title: 'Real-Time Voice', desc: 'ElevenLabs AI voice technology delivers authentic mediation dialogue experiences.' },
+        { icon: '🎭', title: '4 AI Personas', desc: 'Facilitator, Claimant, Respondent, Coach — each with distinct personality and strategy.' },
+        { icon: '📊', title: 'AI Analysis', desc: 'Precise assessment across 5 core competencies: listening, questioning, empathy, interests, resolution.' },
+        { icon: '🌐', title: 'Bilingual', desc: 'Korean & English support for developing international mediation capabilities.' },
+      ],
+    },
+    scenarios: {
+      title: 'Training Scenarios',
+      subtitle: 'Practice across diverse dispute types',
+      items: ['Commercial', 'Financial', 'Employment', 'IP Disputes', 'International'],
+    },
+    howItWorks: {
+      title: 'How It Works',
+      steps: [
+        { step: '01', title: 'Register', desc: 'Quick start with name and email' },
+        { step: '02', title: 'Choose Scenario', desc: 'AI sets up the dispute context' },
+        { step: '03', title: 'Live Mediation', desc: 'Voice-based real-time session' },
+        { step: '04', title: 'AI Feedback', desc: 'Competency analysis and coaching' },
+      ],
+    },
     login: {
       welcome: (name) => `Welcome, ${name}`,
       startPrompt: 'Start your AI negotiation training',
@@ -111,6 +187,8 @@ const T = {
       loginFirst: 'Please log in first.',
       registerFail: 'Registration failed',
       serverError: 'Server connection error',
+      formTitle: 'Start Training',
+      formDesc: 'Register quickly and experience AI mediation training.',
     },
     dash: {
       title: 'Dashboard',
@@ -188,22 +266,34 @@ async function api(path, options = {}) {
   return res.json()
 }
 
+// ─── Icons (inline SVG) ───
+function WingLogo({ size = 32, className = '' }) {
+  return (
+    <div className={`relative ${className}`} style={{ width: size, height: size }}>
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-white font-bold" style={{ fontSize: size * 0.45 }}>W</span>
+      </div>
+    </div>
+  )
+}
+
 // ─── Language Switcher ───
 function LangSwitch({ lang, setLang }) {
   return (
-    <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+    <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full p-0.5 border border-white/10">
       <button
         onClick={() => setLang('ko')}
-        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
-          lang === 'ko' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+          lang === 'ko' ? 'bg-white text-brand-700 shadow-sm' : 'text-white/70 hover:text-white'
         }`}
       >
         한국어
       </button>
       <button
         onClick={() => setLang('en')}
-        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
-          lang === 'en' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+          lang === 'en' ? 'bg-white text-brand-700 shadow-sm' : 'text-white/70 hover:text-white'
         }`}
       >
         EN
@@ -212,8 +302,31 @@ function LangSwitch({ lang, setLang }) {
   )
 }
 
-// ─── Nav ───
-function Nav({ tab, setTab, user, lang, setLang }) {
+function LangSwitchLight({ lang, setLang }) {
+  return (
+    <div className="flex items-center bg-gray-100 rounded-full p-0.5">
+      <button
+        onClick={() => setLang('ko')}
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+          lang === 'ko' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        한국어
+      </button>
+      <button
+        onClick={() => setLang('en')}
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+          lang === 'en' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+        }`}
+      >
+        EN
+      </button>
+    </div>
+  )
+}
+
+// ─── Nav (transparent for landing, solid for inner pages) ───
+function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
   const t = T[lang]
   const tabs = [
     { id: 'home', label: t.tabs.home },
@@ -221,24 +334,47 @@ function Nav({ tab, setTab, user, lang, setLang }) {
     { id: 'train', label: t.tabs.train },
     { id: 'feedback', label: t.tabs.feedback },
   ]
-  return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">W</span>
+
+  if (isLanding) {
+    return (
+      <header className="fixed top-0 w-full z-50 transition-all duration-300">
+        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <WingLogo size={36} />
+            <span className="font-bold text-lg text-white tracking-tight">{t.brand}</span>
           </div>
-          <span className="font-bold text-lg text-brand-700">{t.brand}</span>
+          <div className="flex items-center gap-4">
+            <LangSwitch lang={lang} setLang={setLang} />
+            {user && (
+              <button
+                onClick={() => setTab('dashboard')}
+                className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/20 hover:bg-white/20 transition-all"
+              >
+                {t.tabs.dashboard}
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+    )
+  }
+
+  return (
+    <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setTab('home')}>
+          <WingLogo size={32} />
+          <span className="font-bold text-lg text-gray-900 tracking-tight">{t.brand}</span>
         </div>
         <nav className="flex gap-1">
           {tabs.map(tb => (
             <button
               key={tb.id}
               onClick={() => setTab(tb.id)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 tab === tb.id
-                  ? 'bg-brand-50 text-brand-600'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'bg-brand-50 text-brand-700'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
               }`}
             >
               {tb.label}
@@ -246,18 +382,29 @@ function Nav({ tab, setTab, user, lang, setLang }) {
           ))}
         </nav>
         <div className="flex items-center gap-3">
-          <LangSwitch lang={lang} setLang={setLang} />
-          {user && <span className="text-sm text-gray-500">{user.name}</span>}
+          <LangSwitchLight lang={lang} setLang={setLang} />
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center">
+                <span className="text-brand-700 text-xs font-bold">{user.name?.charAt(0)}</span>
+              </div>
+              <span className="text-sm text-gray-600 font-medium">{user.name}</span>
+            </div>
+          )}
         </div>
       </div>
     </header>
   )
 }
 
-// ─── Home / Login ───
+// ─── Home / Landing ───
 function HomeTab({ user, setUser, setTab, lang }) {
   const t = T[lang].login
   const tb = T[lang]
+  const h = T[lang].hero
+  const f = T[lang].features
+  const s = T[lang].scenarios
+  const hw = T[lang].howItWorks
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -282,63 +429,218 @@ function HomeTab({ user, setUser, setTab, lang }) {
     setLoading(false)
   }
 
+  // Logged-in user welcome
   if (user) {
     return (
-      <div className="max-w-2xl mx-auto mt-20 text-center">
-        <h1 className="text-3xl font-bold text-brand-700 mb-4">{t.welcome(user.name)}</h1>
-        <p className="text-gray-500 mb-8">{t.startPrompt}</p>
-        <button
-          onClick={() => setTab('train')}
-          className="px-8 py-3 bg-brand-500 text-white rounded-xl font-semibold hover:bg-brand-600 transition-colors"
-        >
-          {t.startBtn}
-        </button>
-      </div>
+      <>
+        {/* Hero for logged-in user */}
+        <section className="bg-hero-gradient relative overflow-hidden noise-overlay">
+          <div className="orb orb-1 animate-float" />
+          <div className="orb orb-2 animate-float-slow" />
+          <div className="relative max-w-6xl mx-auto px-6 pt-32 pb-20 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              {t.welcome(user.name)}
+            </h1>
+            <p className="text-lg text-white/60 mb-10">{t.startPrompt}</p>
+            <button
+              onClick={() => setTab('train')}
+              className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5"
+            >
+              {t.startBtn}
+            </button>
+          </div>
+        </section>
+      </>
     )
   }
 
+  // Full landing page for non-logged-in users
   return (
-    <div className="max-w-lg mx-auto mt-16">
-      <div className="text-center mb-10">
-        <div className="w-16 h-16 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-white font-bold text-2xl">W</span>
+    <>
+      {/* ─── Hero Section ─── */}
+      <section className="bg-hero-gradient relative overflow-hidden noise-overlay min-h-screen flex items-center">
+        <div className="orb orb-1 animate-float" />
+        <div className="orb orb-2 animate-float-slow" />
+        <div className="orb orb-3 animate-float" />
+
+        <div className="relative max-w-6xl mx-auto px-6 pt-28 pb-20 w-full">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Copy */}
+            <div className="animate-slide-up">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10 mb-8">
+                <span className="w-2 h-2 bg-accent-teal rounded-full animate-pulse-soft" />
+                <span className="text-sm text-white/80 font-medium">{h.badge}</span>
+              </div>
+
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight">
+                {h.headline1}<br />
+                <span className="text-gradient">{h.headline2}</span>
+              </h1>
+
+              <p className="text-lg text-white/50 leading-relaxed max-w-xl mb-10">
+                {h.desc}
+              </p>
+
+              {/* Stats */}
+              <div className="grid grid-cols-4 gap-4 mt-12">
+                {h.stats.map((stat, i) => (
+                  <div key={i} className="text-center">
+                    <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                    <div className="text-xs text-white/40 font-medium uppercase tracking-wider">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Login Form */}
+            <div className="animate-fade-in">
+              <div className="bg-glass rounded-3xl p-8 md:p-10 glow-brand">
+                <div className="text-center mb-8">
+                  <WingLogo size={48} className="mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-white mb-2">{t.formTitle}</h2>
+                  <p className="text-white/50 text-sm">{t.formDesc}</p>
+                </div>
+
+                <form onSubmit={handleRegister} className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">{t.nameLabel}</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      required
+                      placeholder={t.namePlaceholder}
+                      className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">{t.emailLabel}</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      required
+                      placeholder={t.emailPlaceholder}
+                      className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-bold text-base hover:shadow-lg hover:shadow-brand-500/30 disabled:opacity-50 transition-all duration-300 hover:-translate-y-0.5"
+                  >
+                    {loading ? t.submitting : t.submit}
+                  </button>
+                </form>
+
+                <p className="text-center text-white/30 text-xs mt-6">{h.ctaSub}</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{tb.brand}</h1>
-        <p className="text-gray-500">{tb.subtitle}</p>
-        <p className="text-sm text-gray-400 mt-1">{tb.partner}</p>
-      </div>
-      <form onSubmit={handleRegister} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t.nameLabel}</label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-            placeholder={t.namePlaceholder}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition"
-          />
+      </section>
+
+      {/* ─── Features Section ─── */}
+      <section className="py-24 bg-white relative">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">
+              {f.title}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+              {f.subtitle}
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {f.items.map((item, i) => (
+              <div key={i} className="card-hover bg-white rounded-2xl border border-gray-100 p-7 group">
+                <div className="text-4xl mb-5">{item.icon}</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-brand-700 transition-colors">{item.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t.emailLabel}</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            placeholder={t.emailPlaceholder}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition"
-          />
+      </section>
+
+      {/* ─── How It Works ─── */}
+      <section className="py-24 bg-gray-50 relative">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+              {hw.title}
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {hw.steps.map((step, i) => (
+              <div key={i} className="relative text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-600 text-white rounded-2xl text-xl font-bold mb-5 shadow-lg shadow-brand-500/20">
+                  {step.step}
+                </div>
+                {i < hw.steps.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-gradient-to-r from-brand-300 to-transparent" />
+                )}
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
+                <p className="text-sm text-gray-500">{step.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 bg-brand-500 text-white rounded-xl font-semibold hover:bg-brand-600 disabled:opacity-50 transition-colors"
-        >
-          {loading ? t.submitting : t.submit}
-        </button>
-      </form>
-    </div>
+      </section>
+
+      {/* ─── Scenarios ─── */}
+      <section className="py-24 bg-white relative">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">
+              {s.title}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+              {s.subtitle}
+            </h2>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            {s.items.map((item, i) => (
+              <div key={i} className="card-hover px-8 py-5 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 text-center">
+                <span className="text-base font-semibold text-gray-800">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA Section ─── */}
+      <section className="py-20 bg-hero-gradient relative overflow-hidden noise-overlay">
+        <div className="orb orb-1 animate-float" style={{ opacity: 0.2 }} />
+        <div className="relative max-w-3xl mx-auto px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">
+            {h.headline1} {h.headline2}
+          </h2>
+          <p className="text-white/50 mb-10 max-w-xl mx-auto">{h.desc}</p>
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5"
+          >
+            {h.cta}
+          </button>
+        </div>
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="py-10 bg-navy-950 text-center">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <WingLogo size={28} />
+            <span className="font-bold text-white/80">{tb.brand}</span>
+          </div>
+          <p className="text-white/30 text-sm">{tb.partner}</p>
+          <p className="text-white/20 text-xs mt-4">© 2026 Trinos. All rights reserved.</p>
+        </div>
+      </footer>
+    </>
   )
 }
 
@@ -363,48 +665,48 @@ function DashboardTab({ user, lang }) {
   const pct = usage ? Math.round((usage.minutes_used / usage.minutes_allocated) * 100) : 0
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 space-y-6">
+    <div className="max-w-4xl mx-auto mt-10 space-y-6 px-6">
       <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <p className="text-sm text-gray-500 mb-1">{t.remaining}</p>
-          <p className="text-3xl font-bold text-brand-500">{usage?.minutes_remaining ?? '-'}{t.min}</p>
+          <p className="text-3xl font-bold text-brand-600">{usage?.minutes_remaining ?? '-'}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <p className="text-sm text-gray-500 mb-1">{t.used}</p>
-          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_used ?? 0}{t.min}</p>
+          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_used ?? 0}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <p className="text-sm text-gray-500 mb-1">{t.total}</p>
-          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_allocated ?? 60}{t.min}</p>
+          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_allocated ?? 60}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <div className="flex justify-between text-sm mb-2">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div className="flex justify-between text-sm mb-3">
           <span className="text-gray-500">{t.monthUsage}</span>
-          <span className="font-medium text-gray-700">{pct}%</span>
+          <span className="font-semibold text-brand-600">{pct}%</span>
         </div>
         <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-brand-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+          <div className="h-full bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
         <h3 className="font-semibold text-gray-900 mb-4">{t.recentSessions}</h3>
         {usage?.sessions?.length > 0 ? (
           <div className="space-y-3">
             {usage.sessions.map((s, i) => (
-              <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+              <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                 <div>
                   <p className="font-medium text-gray-800">{s.scenario_title || t.training}</p>
                   <p className="text-sm text-gray-400">{s.started_at ? new Date(s.started_at).toLocaleString(lang === 'ko' ? 'ko-KR' : 'en-US') : '-'}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-gray-700">{s.duration_minutes ?? '-'}{t.min}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    s.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                    s.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
                   }`}>
                     {s.status === 'completed' ? t.completed : t.inProgress}
                   </span>
@@ -428,7 +730,7 @@ function getPersonas(lang) {
     applicant:   { label: p.applicant, bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-600' },
     respondent:  { label: p.respondent, bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-600' },
     coach:       { label: p.coach, bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-100 text-green-600' },
-    unknown:     { label: 'AI', bg: 'bg-gray-100', border: 'border-gray-200', text: 'text-gray-700', badge: 'bg-gray-200 text-gray-600' },
+    unknown:     { label: 'AI', bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', badge: 'bg-gray-200 text-gray-600' },
   }
 }
 
@@ -449,12 +751,6 @@ function cleanText(text) {
     .trim()
 }
 
-function splitSentences(text) {
-  const raw = text.match(/[^.!?。]*[.!?。]+[\s]?|[^.!?。]+$/g)
-  if (!raw || raw.length <= 1) return [text]
-  return raw.map(s => s.trim()).filter(s => s.length > 0)
-}
-
 // ─── Training ───
 function TrainTab({ user, setTab, onSessionEnd, lang }) {
   const t = T[lang].train
@@ -467,15 +763,12 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
   const [status, setStatus] = useState('idle')
   const conversationRef = useRef(null)
   const scrollRef = useRef(null)
-  const timerRefs = useRef([])
+  const pendingRef = useRef([])
+  const speakingRef = useRef(false)
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages])
-
-  useEffect(() => {
-    return () => timerRefs.current.forEach(t => clearTimeout(t))
-  }, [])
 
   const addMessage = useCallback((role, text, persona = 'unknown') => {
     const cleaned = cleanText(text)
@@ -486,16 +779,9 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
     }])
   }, [lang])
 
-  const streamSentences = useCallback((fullText) => {
-    const persona = detectPersona(fullText)
-    const cleaned = cleanText(fullText)
-    if (!cleaned) return
-    const sentences = splitSentences(cleaned)
-    if (sentences.length <= 1) { addMessage('agent', cleaned, persona); return }
-    sentences.forEach((sentence, idx) => {
-      const timer = setTimeout(() => addMessage('agent', sentence, persona), idx * 600)
-      timerRefs.current.push(timer)
-    })
+  const flushPending = useCallback(() => {
+    const items = pendingRef.current.splice(0)
+    items.forEach(({ text, persona }) => addMessage('agent', text, persona))
   }, [addMessage])
 
   const startSession = async () => {
@@ -511,26 +797,51 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
       setSessionId(data.session_id)
       setMessages([])
       setStatus('connecting')
-      timerRefs.current = []
+      pendingRef.current = []
+      speakingRef.current = false
 
       const { Conversation } = await import('@11labs/client')
       const conversation = await Conversation.startSession({
         agentId: AGENT_ID,
-        overrides: {
-          agent: {
-            language: lang === 'en' ? 'en' : 'ko',
-            firstMessage: lang === 'en'
-              ? 'Hello, welcome to the Wing Mediator negotiation simulator. Please choose a scenario and difficulty level. Scenarios: 1. Construction defect dispute. 2. Wage dispute. 3. Partnership dissolution. 4. Real estate dispute. 5. Medical expense dispute. 6. Custom scenario. Difficulty: Beginner, Intermediate, or Advanced. Please say the number and difficulty.'
-              : undefined,
-          },
-        },
         onConnect: () => { setStatus('connected'); setActive(true) },
-        onDisconnect: () => { setStatus('idle') },
-        onMessage: ({ message, source }) => {
-          if (source === 'ai') { streamSentences(message) }
-          else { addMessage('user', message, 'user') }
+        onDisconnect: () => {
+          if (pendingRef.current.length > 0) {
+            pendingRef.current.splice(0).forEach(({ text, persona }) => {
+              const c = cleanText(text)
+              if (c) setMessages(prev => [...prev, { role: 'agent', text: c, persona, time: new Date().toLocaleTimeString(lang === 'ko' ? 'ko-KR' : 'en-US', { hour: '2-digit', minute: '2-digit' }) }])
+            })
+          }
+          setStatus('idle')
         },
-        onModeChange: ({ mode }) => { setStatus(mode === 'speaking' ? 'speaking' : 'listening') },
+        onMessage: ({ message, source }) => {
+          if (source === 'ai') {
+            const persona = detectPersona(message)
+            const cleaned = cleanText(message)
+            if (!cleaned) return
+            if (speakingRef.current) {
+              addMessage('agent', cleaned, persona)
+            } else {
+              pendingRef.current.push({ text: cleaned, persona })
+            }
+          } else {
+            addMessage('user', message, 'user')
+          }
+        },
+        onModeChange: ({ mode }) => {
+          if (mode === 'speaking') {
+            speakingRef.current = true
+            setStatus('speaking')
+            if (pendingRef.current.length > 0) {
+              pendingRef.current.splice(0).forEach(({ text, persona }) => {
+                const c = cleanText(text)
+                if (c) setMessages(prev => [...prev, { role: 'agent', text: c, persona, time: new Date().toLocaleTimeString(lang === 'ko' ? 'ko-KR' : 'en-US', { hour: '2-digit', minute: '2-digit' }) }])
+              })
+            }
+          } else {
+            speakingRef.current = false
+            setStatus('listening')
+          }
+        },
         onError: (error) => {
           console.error('ElevenLabs error:', error)
           addMessage('system', t.micError, 'system')
@@ -547,8 +858,7 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
 
   const endSession = async () => {
     const endedId = sessionId
-    timerRefs.current.forEach(t => clearTimeout(t))
-    timerRefs.current = []
+    pendingRef.current = []
     if (conversationRef.current) {
       try { await conversationRef.current.endSession() } catch (e) {}
       conversationRef.current = null
@@ -570,13 +880,13 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
   if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
+    <div className="max-w-4xl mx-auto mt-10 px-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
         {active ? (
-          <button onClick={endSession} className="px-5 py-2 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors">{t.endBtn}</button>
+          <button onClick={endSession} className="px-6 py-2.5 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-all hover:shadow-lg hover:shadow-red-500/20">{t.endBtn}</button>
         ) : (
-          <button onClick={startSession} disabled={starting} className="px-5 py-2 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors">
+          <button onClick={startSession} disabled={starting} className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-full font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-50 transition-all">
             {starting ? t.connecting : t.startBtn}
           </button>
         )}
@@ -591,19 +901,19 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden" style={{ minHeight: '500px' }}>
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm" style={{ minHeight: '500px' }}>
         {active ? (
           <div className="flex flex-col h-full" style={{ minHeight: '500px' }}>
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-100 bg-gray-50">
-              <div className={`w-3 h-3 rounded-full ${
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-100 bg-gray-50/80">
+              <div className={`w-3 h-3 rounded-full transition-colors ${
                 status === 'speaking' ? 'bg-blue-400 animate-pulse' :
-                status === 'listening' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'
+                status === 'listening' ? 'bg-green-400 animate-pulse' : 'bg-amber-400'
               }`} />
               <span className={`text-sm font-medium ${
                 status === 'speaking' ? 'text-blue-600' :
-                status === 'listening' ? 'text-green-600' : 'text-yellow-600'
+                status === 'listening' ? 'text-green-600' : 'text-amber-600'
               }`}>{statusLabel}</span>
-              {sessionId && <span className="text-xs text-gray-400 ml-auto">ID: {sessionId.slice(0, 12)}...</span>}
+              {sessionId && <span className="text-xs text-gray-400 ml-auto font-mono">ID: {sessionId.slice(0, 12)}...</span>}
             </div>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-2" style={{ maxHeight: '400px' }}>
@@ -618,7 +928,7 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
                 return (
                   <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 border ${
-                      msg.role === 'user' ? 'bg-brand-500 text-white border-brand-500'
+                      msg.role === 'user' ? 'bg-gradient-to-r from-brand-500 to-brand-600 text-white border-brand-500'
                         : msg.role === 'system' ? 'bg-red-50 text-red-600 border-red-200'
                         : `${ps.bg} ${ps.border} ${ps.text}`
                     }`}>
@@ -637,24 +947,24 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
               })}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-center gap-3">
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex items-center justify-center gap-3">
               {status === 'listening' ? (
                 <>
                   <div className="flex gap-1 items-center">
-                    {[4,6,3,5,3].map((h,i) => (
-                      <div key={i} className={`w-1 h-${h} bg-green-${i%2?5:4}00 rounded-full animate-pulse`} style={{ animationDelay: `${i*0.05+0.1}s` }} />
+                    {[0,1,2,3,4].map((i) => (
+                      <div key={i} className="w-1 bg-green-400 rounded-full animate-pulse" style={{ height: `${12 + Math.random() * 12}px`, animationDelay: `${i * 0.1}s` }} />
                     ))}
                   </div>
-                  <span className="text-sm text-green-600">{t.speak}</span>
+                  <span className="text-sm text-green-600 font-medium">{t.speak}</span>
                 </>
               ) : status === 'speaking' ? (
                 <>
                   <div className="flex gap-1 items-center">
-                    {[3,5,4,6,3].map((h,i) => (
-                      <div key={i} className={`w-1 h-${h} bg-blue-${i%2?5:4}00 rounded-full animate-pulse`} style={{ animationDelay: `${i*0.05+0.1}s` }} />
+                    {[0,1,2,3,4].map((i) => (
+                      <div key={i} className="w-1 bg-blue-400 rounded-full animate-pulse" style={{ height: `${12 + Math.random() * 12}px`, animationDelay: `${i * 0.1}s` }} />
                     ))}
                   </div>
-                  <span className="text-sm text-blue-600">{t.aiSpeaking}</span>
+                  <span className="text-sm text-blue-600 font-medium">{t.aiSpeaking}</span>
                 </>
               ) : (
                 <span className="text-sm text-gray-400">{t.preparing}</span>
@@ -663,24 +973,24 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-            <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-brand-50 to-brand-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
               <svg className="w-10 h-10 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">{t.ready}</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">{t.ready}</h3>
             <p className="text-gray-500 mb-2 max-w-md">{t.readyDesc}</p>
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-left max-w-lg">
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="font-medium text-gray-700 mb-1">{t.scenarios}</p>
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-left max-w-lg">
+              <div className="card-hover bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <p className="font-semibold text-gray-800 mb-1">{t.scenarios}</p>
                 <p className="text-gray-400 text-xs">{t.scenarioDesc}</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="font-medium text-gray-700 mb-1">{t.difficulty}</p>
+              <div className="card-hover bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <p className="font-semibold text-gray-800 mb-1">{t.difficulty}</p>
                 <p className="text-gray-400 text-xs">{t.difficultyDesc}</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="font-medium text-gray-700 mb-1">{t.coaching}</p>
+              <div className="card-hover bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <p className="font-semibold text-gray-800 mb-1">{t.coaching}</p>
                 <p className="text-gray-400 text-xs">{t.coachingDesc}</p>
               </div>
             </div>
@@ -726,25 +1036,25 @@ function FeedbackTab({ user, initialSessionId, lang }) {
     <div className="flex items-center gap-3">
       <span className="text-sm text-gray-600 w-24 shrink-0">{label}</span>
       <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-        <div className="h-full bg-brand-500 rounded-full transition-all duration-700" style={{ width: `${score * 10}%` }} />
+        <div className="h-full bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-700" style={{ width: `${score * 10}%` }} />
       </div>
-      <span className="text-sm font-semibold text-gray-700 w-8 text-right">{score}</span>
+      <span className="text-sm font-bold text-gray-700 w-8 text-right">{score}</span>
     </div>
   )
 
   if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 space-y-6">
+    <div className="max-w-4xl mx-auto mt-10 space-y-6 px-6">
       <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
         <label className="block text-sm font-medium text-gray-700 mb-2">{t.sessionId}</label>
         <div className="flex gap-3">
           <input type="text" value={sessionId} onChange={e => setSessionId(e.target.value)}
-            placeholder="ses_..." className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+            placeholder="ses_..." className="flex-1 px-5 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 outline-none transition-all" />
           <button onClick={generateFeedback} disabled={loading}
-            className="px-6 py-3 bg-brand-500 text-white rounded-xl font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors">
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-50 transition-all">
             {loading ? t.generating : t.generate}
           </button>
         </div>
@@ -759,7 +1069,7 @@ function FeedbackTab({ user, initialSessionId, lang }) {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
             <h3 className="font-semibold text-gray-900">{t.scores}</h3>
             <ScoreBar label={t.listening} score={feedback.scores?.listening ?? 0} />
             <ScoreBar label={t.questioning} score={feedback.scores?.questioning ?? 0} />
@@ -769,7 +1079,7 @@ function FeedbackTab({ user, initialSessionId, lang }) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
               <h3 className="font-semibold text-green-600 mb-3">{t.strengths}</h3>
               <ul className="space-y-2">
                 {(feedback.strengths || []).map((s, i) => (
@@ -777,7 +1087,7 @@ function FeedbackTab({ user, initialSessionId, lang }) {
                 ))}
               </ul>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
               <h3 className="font-semibold text-amber-600 mb-3">{t.improvements}</h3>
               <ul className="space-y-2">
                 {(feedback.improvements || []).map((s, i) => (
@@ -788,18 +1098,18 @@ function FeedbackTab({ user, initialSessionId, lang }) {
           </div>
 
           {feedback.techniques_available?.length > 0 && (
-            <div className="bg-brand-50 rounded-2xl p-6">
+            <div className="bg-brand-50 rounded-2xl p-6 border border-brand-100">
               <h3 className="font-semibold text-brand-700 mb-3">{t.techniques}</h3>
               <div className="flex flex-wrap gap-2">
                 {feedback.techniques_available.map((tc, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-white text-brand-600 text-sm rounded-lg border border-brand-200">{tc}</span>
+                  <span key={i} className="px-3 py-1.5 bg-white text-brand-600 text-sm rounded-lg border border-brand-200 font-medium">{tc}</span>
                 ))}
               </div>
             </div>
           )}
 
           {feedback.overall && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-2">{t.overall}</h3>
               <p className="text-gray-600 text-sm leading-relaxed">{feedback.overall}</p>
             </div>
@@ -817,18 +1127,22 @@ export default function Home() {
   const [lastSessionId, setLastSessionId] = useState(null)
   const [lang, setLang] = useState('ko')
 
+  const isLanding = tab === 'home' && !user
+
   return (
-    <>
-      <Nav tab={tab} setTab={setTab} user={user} lang={lang} setLang={setLang} />
-      <main className="pb-20 px-4">
+    <div className={isLanding ? '' : 'bg-gray-50 min-h-screen'}>
+      <Nav tab={tab} setTab={setTab} user={user} lang={lang} setLang={setLang} isLanding={isLanding} />
+      <main className={isLanding ? '' : 'pb-20'}>
         {tab === 'home' && <HomeTab user={user} setUser={setUser} setTab={setTab} lang={lang} />}
         {tab === 'dashboard' && <DashboardTab user={user} lang={lang} />}
         {tab === 'train' && <TrainTab user={user} setTab={setTab} onSessionEnd={setLastSessionId} lang={lang} />}
         {tab === 'feedback' && <FeedbackTab user={user} initialSessionId={lastSessionId} lang={lang} />}
       </main>
-      <footer className="fixed bottom-0 w-full bg-white border-t border-gray-100 py-3 text-center text-xs text-gray-400">
-        Wing Mediator v0.1 — Powered by Trinos {lang === 'ko' ? '× KCAB' : 'AI'}
-      </footer>
-    </>
+      {!isLanding && (
+        <footer className="fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-gray-100 py-3 text-center text-xs text-gray-400">
+          Wing Mediator v0.1 — Powered by Trinos {lang === 'ko' ? '× KCAB' : 'AI'}
+        </footer>
+      )}
+    </div>
   )
 }
