@@ -4,6 +4,7 @@
 
 body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bg-hero-gradient {
@@ -39,6 +40,16 @@ body {
 .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(244,197,66,0.25) 0%, transparent 70%); bottom: -50px; left: -100px; }
 .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(32,201,151,0.25) 0%, transparent 70%); top: 40%; left: 50%; }
 
+/* Mobile: scale down orbs to prevent overflow */
+@media (max-width: 768px) {
+  .orb-1 { width: 250px; height: 250px; top: -60px; right: -60px; }
+  .orb-2 { width: 200px; height: 200px; bottom: -30px; left: -60px; }
+  .orb-3 { width: 150px; height: 150px; }
+  .glow-brand {
+    box-shadow: 0 0 30px rgba(92, 124, 250, 0.12), 0 0 60px rgba(66, 99, 235, 0.06);
+  }
+}
+
 .noise-overlay::before {
   content: '';
   position: absolute;
@@ -58,6 +69,17 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04);
 }
 
+/* Disable hover lift on touch devices to prevent sticky hover */
+@media (hover: none) {
+  .card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .card-hover:active {
+    transform: scale(0.98);
+  }
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -74,3 +96,10 @@ elevenlabs-convai {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
+
+/* Safe area insets for notched devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

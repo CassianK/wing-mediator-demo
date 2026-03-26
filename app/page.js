@@ -550,6 +550,22 @@ function LangSwitchLight({ lang, setLang }) {
   )
 }
 
+// ─── Tab icons for mobile bottom nav ───
+const TAB_ICONS = {
+  home: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+  ),
+  dashboard: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+  ),
+  train: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+  ),
+  feedback: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+  ),
+}
+
 // ─── Nav ───
 function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
   const t = T[lang]
@@ -563,15 +579,15 @@ function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
   if (isLanding) {
     return (
       <header className="fixed top-0 w-full z-50">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <WingLogo size={36} />
-            <span className="font-bold text-lg text-white tracking-tight">{t.brand}</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <WingLogo size={32} />
+            <span className="font-bold text-base sm:text-lg text-white tracking-tight">{t.brand}</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <LangSwitch lang={lang} setLang={setLang} />
             {user && (
-              <button onClick={() => setTab('dashboard')} className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/20 hover:bg-white/20 transition-all">
+              <button onClick={() => setTab('dashboard')} className="hidden sm:block px-4 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/20 hover:bg-white/20 transition-all">
                 {t.tabs.dashboard}
               </button>
             )}
@@ -582,32 +598,48 @@ function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
   }
 
   return (
-    <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setTab('home')}>
-          <WingLogo size={32} />
-          <span className="font-bold text-lg text-gray-900 tracking-tight">{t.brand}</span>
+    <>
+      {/* Desktop top nav */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => setTab('home')}>
+            <WingLogo size={28} />
+            <span className="font-bold text-base sm:text-lg text-gray-900 tracking-tight">{t.brand}</span>
+          </div>
+          {/* Desktop tabs */}
+          <nav className="hidden md:flex gap-1">
+            {tabs.map(tb => (
+              <button key={tb.id} onClick={() => setTab(tb.id)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${tab === tb.id ? 'bg-brand-50 text-brand-700' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'}`}>
+                {tb.label}
+              </button>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LangSwitchLight lang={lang} setLang={setLang} />
+            {user && (
+              <div className="hidden sm:flex items-center gap-2">
+                <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center">
+                  <span className="text-brand-700 text-xs font-bold">{user.name?.charAt(0)}</span>
+                </div>
+                <span className="text-sm text-gray-600 font-medium">{user.name}</span>
+              </div>
+            )}
+          </div>
         </div>
-        <nav className="flex gap-1">
+      </header>
+
+      {/* Mobile bottom tab bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 safe-bottom">
+        <div className="flex justify-around items-center h-14">
           {tabs.map(tb => (
-            <button key={tb.id} onClick={() => setTab(tb.id)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${tab === tb.id ? 'bg-brand-50 text-brand-700' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'}`}>
-              {tb.label}
+            <button key={tb.id} onClick={() => setTab(tb.id)} className={`flex flex-col items-center justify-center gap-0.5 w-full h-full transition-colors ${tab === tb.id ? 'text-brand-600' : 'text-gray-400'}`}>
+              {TAB_ICONS[tb.id]}
+              <span className="text-[10px] font-medium">{tb.label}</span>
             </button>
           ))}
-        </nav>
-        <div className="flex items-center gap-3">
-          <LangSwitchLight lang={lang} setLang={setLang} />
-          {user && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center">
-                <span className="text-brand-700 text-xs font-bold">{user.name?.charAt(0)}</span>
-              </div>
-              <span className="text-sm text-gray-600 font-medium">{user.name}</span>
-            </div>
-          )}
         </div>
-      </div>
-    </header>
+      </nav>
+    </>
   )
 }
 
@@ -621,21 +653,21 @@ function ScenarioPicker({ lang, selected, onSelect }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-5">
         <div>
-          <h3 className="text-lg font-bold text-gray-900">{t.selectScenario}</h3>
-          <p className="text-sm text-gray-500 mt-0.5">{t.selectPrompt}</p>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">{t.selectScenario}</h3>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{t.selectPrompt}</p>
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 flex-wrap">
           {Object.entries(filterLabels).map(([key, label]) => (
-            <button key={key} onClick={() => setFilter(key)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filter === key ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+            <button key={key} onClick={() => setFilter(key)} className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium transition-all ${filter === key ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               {label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         {filtered.map(scenario => {
           const s = scenario[lang]
           const lv = LEVEL_CONFIG[scenario.level][lang]
@@ -644,18 +676,18 @@ function ScenarioPicker({ lang, selected, onSelect }) {
             <button
               key={scenario.id}
               onClick={() => onSelect(scenario)}
-              className={`text-left p-5 rounded-2xl border-2 transition-all duration-200 group ${
+              className={`text-left p-3 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all duration-200 group ${
                 isSelected
                   ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10'
                   : 'border-gray-100 bg-white hover:border-brand-200 hover:shadow-sm'
               }`}
             >
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-2xl">{scenario.icon}</span>
-                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
+              <div className="flex items-start justify-between mb-2 sm:mb-3">
+                <span className="text-xl sm:text-2xl">{scenario.icon}</span>
+                <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
               </div>
-              <h4 className={`font-bold text-sm mb-1.5 ${isSelected ? 'text-brand-700' : 'text-gray-900 group-hover:text-brand-700'} transition-colors`}>{s.title}</h4>
-              <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{s.desc}</p>
+              <h4 className={`font-bold text-xs sm:text-sm mb-1 sm:mb-1.5 ${isSelected ? 'text-brand-700' : 'text-gray-900 group-hover:text-brand-700'} transition-colors`}>{s.title}</h4>
+              <p className="text-[10px] sm:text-xs text-gray-500 leading-relaxed line-clamp-2">{s.desc}</p>
             </button>
           )
         })}
@@ -671,33 +703,33 @@ function ScenarioDetail({ scenario, lang, onClear }) {
   const lv = LEVEL_CONFIG[scenario.level][lang]
 
   return (
-    <div className="bg-gradient-to-r from-brand-50 to-white rounded-2xl border border-brand-100 p-6">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">{scenario.icon}</span>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-gray-900">{s.title}</h3>
-              <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
+    <div className="bg-gradient-to-r from-brand-50 to-white rounded-xl sm:rounded-2xl border border-brand-100 p-4 sm:p-6">
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <span className="text-2xl sm:text-3xl shrink-0">{scenario.icon}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-bold text-sm sm:text-base text-gray-900">{s.title}</h3>
+              <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
             </div>
-            <p className="text-sm text-gray-500 mt-0.5">{s.brief}</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 line-clamp-2">{s.brief}</p>
           </div>
         </div>
-        <button onClick={onClear} className="text-sm text-brand-600 hover:text-brand-700 font-medium">{t.change}</button>
+        <button onClick={onClear} className="text-xs sm:text-sm text-brand-600 hover:text-brand-700 font-medium shrink-0 ml-2">{t.change}</button>
       </div>
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <div className="bg-white/80 rounded-xl p-3">
-          <span className="text-xs font-medium text-blue-600">{t.applicantLabel}</span>
-          <p className="text-sm font-semibold text-gray-800 mt-0.5">{s.applicant}</p>
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 mt-3 sm:mt-4">
+        <div className="bg-white/80 rounded-lg sm:rounded-xl p-2.5 sm:p-3">
+          <span className="text-[10px] sm:text-xs font-medium text-blue-600">{t.applicantLabel}</span>
+          <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-0.5">{s.applicant}</p>
         </div>
-        <div className="bg-white/80 rounded-xl p-3">
-          <span className="text-xs font-medium text-orange-600">{t.respondentLabel}</span>
-          <p className="text-sm font-semibold text-gray-800 mt-0.5">{s.respondent}</p>
+        <div className="bg-white/80 rounded-lg sm:rounded-xl p-2.5 sm:p-3">
+          <span className="text-[10px] sm:text-xs font-medium text-orange-600">{t.respondentLabel}</span>
+          <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-0.5">{s.respondent}</p>
         </div>
       </div>
-      <div className="mt-3">
-        <span className="text-xs font-medium text-gray-500">{t.keyIssues}</span>
-        <p className="text-xs text-gray-600 mt-0.5">{s.keywords}</p>
+      <div className="mt-2 sm:mt-3">
+        <span className="text-[10px] sm:text-xs font-medium text-gray-500">{t.keyIssues}</span>
+        <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">{s.keywords}</p>
       </div>
     </div>
   )
@@ -754,10 +786,10 @@ function HomeTab({ user, setUser, setTab, lang }) {
       <section className="bg-hero-gradient relative overflow-hidden noise-overlay">
         <div className="orb orb-1 animate-float" />
         <div className="orb orb-2 animate-float-slow" />
-        <div className="relative max-w-6xl mx-auto px-6 pt-32 pb-20 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{t.welcome(user.name)}</h1>
-          <p className="text-lg text-white/60 mb-10">{t.startPrompt}</p>
-          <button onClick={() => setTab('train')} className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-16 sm:pb-20 text-center">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">{t.welcome(user.name)}</h1>
+          <p className="text-sm sm:text-lg text-white/60 mb-6 sm:mb-10">{t.startPrompt}</p>
+          <button onClick={() => setTab('train')} className="px-8 sm:px-10 py-3 sm:py-4 bg-white text-brand-700 rounded-full font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5">
             {t.startBtn}
           </button>
         </div>
@@ -772,29 +804,29 @@ function HomeTab({ user, setUser, setTab, lang }) {
         <div className="orb orb-1 animate-float" />
         <div className="orb orb-2 animate-float-slow" />
         <div className="orb orb-3 animate-float" />
-        <div className="relative max-w-6xl mx-auto px-6 pt-28 pb-20 w-full">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 sm:pb-20 w-full">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div className="animate-slide-up">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10 mb-8">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10 mb-5 sm:mb-8">
                 <span className="w-2 h-2 bg-accent-teal rounded-full animate-pulse-soft" />
-                <span className="text-sm text-white/80 font-medium">{h.badge}</span>
+                <span className="text-xs sm:text-sm text-white/80 font-medium">{h.badge}</span>
               </div>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight">
+              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-4 sm:mb-6 tracking-tight">
                 {h.headline1}<br />
                 <span className="text-gradient">{h.headline2}</span>
               </h1>
-              <p className="text-lg text-white/50 leading-relaxed max-w-xl mb-10">{h.desc}</p>
-              <div className="grid grid-cols-4 gap-4 mt-12">
+              <p className="text-sm sm:text-lg text-white/50 leading-relaxed max-w-xl mb-6 sm:mb-10">{h.desc}</p>
+              <div className="grid grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-12">
                 {h.stats.map((stat, i) => (
                   <div key={i} className="text-center">
-                    <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                    <div className="text-xs text-white/40 font-medium uppercase tracking-wider">{stat.label}</div>
+                    <div className="text-lg sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">{stat.value}</div>
+                    <div className="text-[10px] sm:text-xs text-white/40 font-medium uppercase tracking-wider">{stat.label}</div>
                   </div>
                 ))}
               </div>
             </div>
             <div className="animate-fade-in">
-              <div className="bg-glass rounded-3xl p-8 md:p-10 glow-brand">
+              <div className="bg-glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 glow-brand">
                 <div className="text-center mb-8">
                   <WingLogo size={48} className="mx-auto mb-4" />
                   <h2 className="text-2xl font-bold text-white mb-2">{t.formTitle}</h2>
@@ -830,18 +862,18 @@ function HomeTab({ user, setUser, setTab, lang }) {
       </section>
 
       {/* Features */}
-      <section className="py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">{f.title}</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">{f.subtitle}</h2>
+      <section className="py-12 sm:py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-16">
+            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-3 sm:mb-4">{f.title}</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">{f.subtitle}</h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {f.items.map((item, i) => (
-              <div key={i} className="card-hover bg-white rounded-2xl border border-gray-100 p-7 group">
-                <div className="text-4xl mb-5">{item.icon}</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-brand-700 transition-colors">{item.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+              <div key={i} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-7 group">
+                <div className="text-2xl sm:text-4xl mb-3 sm:mb-5">{item.icon}</div>
+                <h3 className="text-sm sm:text-lg font-bold text-gray-900 mb-1.5 sm:mb-3 group-hover:text-brand-700 transition-colors">{item.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -849,37 +881,37 @@ function HomeTab({ user, setUser, setTab, lang }) {
       </section>
 
       {/* 10 Scenarios Showcase */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">{ss.title}</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-3">{ss.subtitle}</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">{ss.desc}</p>
+      <section className="py-12 sm:py-24 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-12">
+            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-3 sm:mb-4">{ss.title}</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-2 sm:mb-3">{ss.subtitle}</h2>
+            <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto">{ss.desc}</p>
           </div>
 
-          <div className="flex justify-center gap-2 mb-10">
+          <div className="flex justify-center gap-1.5 sm:gap-2 mb-6 sm:mb-10 flex-wrap">
             {Object.entries(ss.levelFilter).map(([key, label]) => (
-              <button key={key} onClick={() => setScenarioFilter(key)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${scenarioFilter === key ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
+              <button key={key} onClick={() => setScenarioFilter(key)} className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${scenarioFilter === key ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
                 {label}
               </button>
             ))}
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
             {filteredScenarios.map(scenario => {
               const s = scenario[lang]
               const lv = LEVEL_CONFIG[scenario.level][lang]
               return (
-                <div key={scenario.id} className="card-hover bg-white rounded-2xl border border-gray-100 p-6 group">
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="text-3xl">{scenario.icon}</span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
+                <div key={scenario.id} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6 group">
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <span className="text-2xl sm:text-3xl">{scenario.icon}</span>
+                    <span className={`text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-brand-700 transition-colors">{s.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed mb-4">{s.desc}</p>
-                  <div className="flex gap-2">
-                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{s.applicant}</span>
-                    <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full">{s.respondent}</span>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5 sm:mb-2 group-hover:text-brand-700 transition-colors">{s.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 leading-relaxed mb-3 sm:mb-4">{s.desc}</p>
+                  <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="text-[10px] sm:text-xs bg-blue-50 text-blue-600 px-2 py-0.5 sm:py-1 rounded-full">{s.applicant}</span>
+                    <span className="text-[10px] sm:text-xs bg-orange-50 text-orange-600 px-2 py-0.5 sm:py-1 rounded-full">{s.respondent}</span>
                   </div>
                 </div>
               )
@@ -889,18 +921,18 @@ function HomeTab({ user, setUser, setTab, lang }) {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">{hw.title}</h2>
+      <section className="py-12 sm:py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">{hw.title}</h2>
           </div>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {hw.steps.map((step, i) => (
               <div key={i} className="relative text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-600 text-white rounded-2xl text-xl font-bold mb-5 shadow-lg shadow-brand-500/20">{step.step}</div>
+                <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-brand-600 text-white rounded-xl sm:rounded-2xl text-base sm:text-xl font-bold mb-3 sm:mb-5 shadow-lg shadow-brand-500/20">{step.step}</div>
                 {i < hw.steps.length - 1 && <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-gradient-to-r from-brand-300 to-transparent" />}
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-500">{step.desc}</p>
+                <h3 className="text-sm sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">{step.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-500">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -908,20 +940,20 @@ function HomeTab({ user, setUser, setTab, lang }) {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-hero-gradient relative overflow-hidden noise-overlay">
+      <section className="py-12 sm:py-20 bg-hero-gradient relative overflow-hidden noise-overlay">
         <div className="orb orb-1 animate-float" style={{ opacity: 0.2 }} />
-        <div className="relative max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">{h.headline1} {h.headline2}</h2>
-          <p className="text-white/50 mb-10 max-w-xl mx-auto">{h.desc}</p>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5">
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6 tracking-tight">{h.headline1} {h.headline2}</h2>
+          <p className="text-sm sm:text-base text-white/50 mb-6 sm:mb-10 max-w-xl mx-auto">{h.desc}</p>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="px-8 sm:px-10 py-3 sm:py-4 bg-white text-brand-700 rounded-full font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5">
             {h.cta}
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-10 bg-navy-950 text-center">
-        <div className="max-w-6xl mx-auto px-6">
+      <footer className="py-8 sm:py-10 bg-navy-950 text-center pb-20 sm:pb-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-center gap-3 mb-4">
             <WingLogo size={28} />
             <span className="font-bold text-white/80">{tb.brand}</span>
@@ -952,17 +984,17 @@ function DashboardTab({ user, lang }) {
   const pct = usage ? Math.round((usage.minutes_used / usage.minutes_allocated) * 100) : 0
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 space-y-6 px-6">
-      <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
-      <div className="grid grid-cols-3 gap-4">
+    <div className="max-w-4xl mx-auto mt-6 sm:mt-10 space-y-4 sm:space-y-6 px-4 sm:px-6 pb-16 sm:pb-0">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{t.title}</h2>
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {[
           { label: t.remaining, value: usage?.minutes_remaining ?? '-', accent: true },
           { label: t.used, value: usage?.minutes_used ?? 0 },
           { label: t.total, value: usage?.minutes_allocated ?? 60 },
         ].map((item, i) => (
-          <div key={i} className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <p className="text-sm text-gray-500 mb-1">{item.label}</p>
-            <p className={`text-3xl font-bold ${item.accent ? 'text-brand-600' : 'text-gray-900'}`}>{item.value}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
+          <div key={i} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-6 shadow-sm">
+            <p className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1">{item.label}</p>
+            <p className={`text-xl sm:text-3xl font-bold ${item.accent ? 'text-brand-600' : 'text-gray-900'}`}>{item.value}<span className="text-xs sm:text-base font-medium text-gray-400 ml-0.5 sm:ml-1">{t.min}</span></p>
           </div>
         ))}
       </div>
@@ -1185,12 +1217,12 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
   if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
 
   return (
-    <div className="max-w-5xl mx-auto mt-10 px-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
+    <div className="max-w-5xl mx-auto mt-4 sm:mt-10 px-4 sm:px-6 pb-16 sm:pb-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{t.title}</h2>
           {remainingMin !== null && (
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+            <div className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold ${
               remainingMin > 15 ? 'bg-green-50 text-green-700 border border-green-200' :
               remainingMin > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' :
               'bg-red-50 text-red-700 border border-red-200'
@@ -1201,14 +1233,14 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
           )}
         </div>
         {active ? (
-          <button onClick={endSession} className="px-6 py-2.5 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-all hover:shadow-lg hover:shadow-red-500/20">{t.endBtn}</button>
+          <button onClick={endSession} className="w-full sm:w-auto px-6 py-2.5 bg-red-500 text-white rounded-full font-medium text-sm hover:bg-red-600 transition-all hover:shadow-lg hover:shadow-red-500/20">{t.endBtn}</button>
         ) : remainingMin !== null && remainingMin <= 0 ? (
-          <div className="px-6 py-2.5 bg-gray-100 text-gray-400 rounded-full font-medium cursor-not-allowed">
+          <div className="w-full sm:w-auto px-6 py-2.5 bg-gray-100 text-gray-400 rounded-full font-medium text-sm text-center cursor-not-allowed">
             {tl.timeExpired}
           </div>
         ) : (
           <button onClick={startSession} disabled={starting || !selectedScenario}
-            className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-full font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+            className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-full font-medium text-sm hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
             {starting ? t.connecting : t.startBtn}
           </button>
         )}
@@ -1244,9 +1276,9 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
       )}
 
       {/* Chat area */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm" style={{ minHeight: '500px' }}>
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden shadow-sm" style={{ minHeight: '400px' }}>
         {active ? (
-          <div className="flex flex-col h-full" style={{ minHeight: '500px' }}>
+          <div className="flex flex-col h-full" style={{ minHeight: '400px' }}>
             <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-100 bg-gray-50/80">
               <div className={`w-3 h-3 rounded-full transition-colors ${status === 'speaking' ? 'bg-blue-400 animate-pulse' : status === 'listening' ? 'bg-green-400 animate-pulse' : 'bg-amber-400'}`} />
               <span className={`text-sm font-medium ${status === 'speaking' ? 'text-blue-600' : status === 'listening' ? 'text-green-600' : 'text-amber-600'}`}>{statusLabel}</span>
@@ -1354,15 +1386,15 @@ function FeedbackTab({ user, initialSessionId, lang }) {
   if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 space-y-6 px-6">
-      <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+    <div className="max-w-4xl mx-auto mt-6 sm:mt-10 space-y-4 sm:space-y-6 px-4 sm:px-6 pb-16 sm:pb-0">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{t.title}</h2>
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm">
         <label className="block text-sm font-medium text-gray-700 mb-2">{t.sessionId}</label>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <input type="text" value={sessionId} onChange={e => setSessionId(e.target.value)} placeholder="ses_..."
-            className="flex-1 px-5 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 outline-none transition-all" />
+            className="flex-1 px-4 sm:px-5 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 outline-none transition-all" />
           <button onClick={generateFeedback} disabled={loading}
-            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-50 transition-all">
+            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-medium text-sm hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-50 transition-all">
             {loading ? t.generating : t.generate}
           </button>
         </div>
@@ -1383,13 +1415,13 @@ function FeedbackTab({ user, initialSessionId, lang }) {
             <ScoreBar label={t.interests} score={feedback.scores?.interests ?? 0} />
             <ScoreBar label={t.resolution} score={feedback.scores?.resolution ?? 0} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-              <h3 className="font-semibold text-green-600 mb-3">{t.strengths}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm">
+              <h3 className="font-semibold text-green-600 mb-2 sm:mb-3 text-sm sm:text-base">{t.strengths}</h3>
               <ul className="space-y-2">{(feedback.strengths || []).map((s, i) => <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-green-500 shrink-0">✓</span> {s}</li>)}</ul>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-              <h3 className="font-semibold text-amber-600 mb-3">{t.improvements}</h3>
+            <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm">
+              <h3 className="font-semibold text-amber-600 mb-2 sm:mb-3 text-sm sm:text-base">{t.improvements}</h3>
               <ul className="space-y-2">{(feedback.improvements || []).map((s, i) => <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-amber-500 shrink-0">→</span> {s}</li>)}</ul>
             </div>
           </div>
@@ -1430,7 +1462,7 @@ export default function Home() {
         {tab === 'feedback' && <FeedbackTab user={user} initialSessionId={lastSessionId} lang={lang} />}
       </main>
       {!isLanding && (
-        <footer className="fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-gray-100 py-3 text-center text-xs text-gray-400">
+        <footer className="hidden md:block fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-gray-100 py-3 text-center text-xs text-gray-400">
           Wing Mediator v0.3 — Powered by Trinos
         </footer>
       )}
