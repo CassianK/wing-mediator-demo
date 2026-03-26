@@ -5,6 +5,235 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 const API_BASE = 'https://wmediator.trinos.group'
 const AGENT_ID = 'agent_1201km3k1xa0ee0bc2j2zdpp5rr6'
 
+// ─── Scenarios ───
+const SCENARIOS = [
+  {
+    id: 'construction',
+    icon: '🏗️',
+    level: 'intermediate',
+    ko: {
+      title: '건설 분쟁',
+      desc: '아파트 신축 공사 중 공기 지연 및 추가 공사비 청구',
+      brief: '시공사와 시행사 간 공기 연장, 추가 비용, 하자 보수 책임 공방',
+      applicant: '시공사 대표',
+      respondent: '시행사 담당이사',
+      keywords: '공기지연, 추가공사비, 하자보수',
+    },
+    en: {
+      title: 'Construction Dispute',
+      desc: 'Project delay and additional cost claims in apartment construction',
+      brief: 'Dispute between contractor and developer over timeline extension, extra costs, and defect liability',
+      applicant: 'Contractor CEO',
+      respondent: 'Developer Director',
+      keywords: 'delay, extra costs, defect liability',
+    },
+  },
+  {
+    id: 'financial',
+    icon: '💰',
+    level: 'advanced',
+    ko: {
+      title: '금융 분쟁',
+      desc: '투자자문사의 부적합 투자 권유로 인한 고객 손실',
+      brief: '적합성 원칙 위반, 설명의무, 손해액 산정 및 과실상계',
+      applicant: '개인투자자',
+      respondent: '투자자문사 준법감시인',
+      keywords: '적합성원칙, 설명의무, 손해배상',
+    },
+    en: {
+      title: 'Financial Dispute',
+      desc: 'Client losses from unsuitable investment advisory recommendations',
+      brief: 'Suitability principle violation, duty of explanation, damages calculation',
+      applicant: 'Individual Investor',
+      respondent: 'Compliance Officer',
+      keywords: 'suitability, duty of care, damages',
+    },
+  },
+  {
+    id: 'employment',
+    icon: '👔',
+    level: 'beginner',
+    ko: {
+      title: '노동 분쟁',
+      desc: '부당해고 주장 직원과 경영상 해고를 주장하는 회사',
+      brief: '해고 사유 정당성, 절차적 요건, 복직 vs 금전 보상',
+      applicant: '해고 직원',
+      respondent: '인사담당 임원',
+      keywords: '부당해고, 복직, 금전보상',
+    },
+    en: {
+      title: 'Employment Dispute',
+      desc: 'Unfair dismissal claim vs. legitimate business restructuring',
+      brief: 'Dismissal justification, procedural requirements, reinstatement vs. compensation',
+      applicant: 'Dismissed Employee',
+      respondent: 'HR Executive',
+      keywords: 'unfair dismissal, reinstatement, compensation',
+    },
+  },
+  {
+    id: 'ip',
+    icon: '🧠',
+    level: 'advanced',
+    ko: {
+      title: '지식재산 분쟁',
+      desc: 'AI 알고리즘 특허 침해 vs 독자 개발 주장',
+      brief: '특허 청구범위 해석, 기술적 동일성, 라이선스 협상',
+      applicant: '대기업 IP팀장',
+      respondent: '스타트업 CTO',
+      keywords: '특허침해, 라이선스, 기술분쟁',
+    },
+    en: {
+      title: 'IP Dispute',
+      desc: 'AI algorithm patent infringement vs. independent development claim',
+      brief: 'Patent claim interpretation, technical equivalence, licensing negotiation',
+      applicant: 'Corporate IP Director',
+      respondent: 'Startup CTO',
+      keywords: 'patent infringement, licensing, tech dispute',
+    },
+  },
+  {
+    id: 'international',
+    icon: '🌏',
+    level: 'advanced',
+    ko: {
+      title: '국제상사 분쟁',
+      desc: '한국 수출업체와 동남아 바이어 간 물품 하자·대금 분쟁',
+      brief: '물품 검수 기준, 하자 통지 시기, CISG 적용, 통화 환산',
+      applicant: '한국 수출업체 대표',
+      respondent: '동남아 바이어 구매담당',
+      keywords: 'CISG, 국제거래, 통화환산',
+    },
+    en: {
+      title: 'International Commercial',
+      desc: 'Product defects and payment dispute between Korean exporter and SE Asian buyer',
+      brief: 'Inspection standards, defect notification, CISG application, currency conversion',
+      applicant: 'Korean Exporter CEO',
+      respondent: 'SE Asian Buyer Manager',
+      keywords: 'CISG, cross-border, currency',
+    },
+  },
+  {
+    id: 'realestate',
+    icon: '🏢',
+    level: 'beginner',
+    ko: {
+      title: '부동산·임대차 분쟁',
+      desc: '상가 재건축 통보와 임차인의 영업보상 요구 충돌',
+      brief: '계약 갱신 요구권, 권리금 회수, 영업손실 보상, 원상복구',
+      applicant: '상가 임차인',
+      respondent: '건물주',
+      keywords: '권리금, 갱신요구권, 영업보상',
+    },
+    en: {
+      title: 'Real Estate / Lease',
+      desc: 'Commercial lease termination for redevelopment vs. tenant compensation',
+      brief: 'Lease renewal rights, key money recovery, business loss compensation',
+      applicant: 'Commercial Tenant',
+      respondent: 'Building Owner',
+      keywords: 'key money, renewal rights, compensation',
+    },
+  },
+  {
+    id: 'medical',
+    icon: '🏥',
+    level: 'intermediate',
+    ko: {
+      title: '의료 분쟁',
+      desc: '수술 후 합병증 — 의료과실 vs 불가피한 합병증',
+      brief: '의료 과실 여부, 설명 동의, 인과관계, 위자료 산정',
+      applicant: '환자 보호자',
+      respondent: '병원 의료분쟁담당',
+      keywords: '의료과실, 설명동의, 위자료',
+    },
+    en: {
+      title: 'Medical Dispute',
+      desc: 'Post-surgery complications — medical malpractice vs. unavoidable risk',
+      brief: 'Medical negligence, informed consent, causation, emotional distress damages',
+      applicant: 'Patient Family',
+      respondent: 'Hospital Dispute Manager',
+      keywords: 'malpractice, informed consent, damages',
+    },
+  },
+  {
+    id: 'consumer',
+    icon: '🛒',
+    level: 'beginner',
+    ko: {
+      title: '소비자 분쟁',
+      desc: '전자제품 반복 결함과 교환·환불 거부',
+      brief: '제조물 책임, 하자 담보, 소비자기본법, 보상 범위',
+      applicant: '소비자',
+      respondent: '제조사 고객서비스팀장',
+      keywords: '제조물책임, 환불, 소비자보호',
+    },
+    en: {
+      title: 'Consumer Dispute',
+      desc: 'Repeated product defects and refusal of exchange/refund',
+      brief: 'Product liability, warranty, consumer protection law, compensation scope',
+      applicant: 'Consumer',
+      respondent: 'Manufacturer CS Director',
+      keywords: 'product liability, refund, consumer protection',
+    },
+  },
+  {
+    id: 'ma',
+    icon: '🤝',
+    level: 'advanced',
+    ko: {
+      title: 'M&A·주주 분쟁',
+      desc: '스타트업 인수 후 진술·보증 위반 발견',
+      brief: '진술보증 위반 범위, 에스크로 해제, 손해배상, Earn-out 조건',
+      applicant: '인수기업 M&A담당',
+      respondent: '스타트업 창업자',
+      keywords: '진술보증, 에스크로, Earn-out',
+    },
+    en: {
+      title: 'M&A / Shareholder',
+      desc: 'Post-acquisition rep & warranty breach discovery',
+      brief: 'Rep & warranty breach scope, escrow release, indemnification, earn-out terms',
+      applicant: 'Acquirer M&A Lead',
+      respondent: 'Startup Founder',
+      keywords: 'rep & warranty, escrow, earn-out',
+    },
+  },
+  {
+    id: 'tech',
+    icon: '💻',
+    level: 'intermediate',
+    ko: {
+      title: 'IT·플랫폼 분쟁',
+      desc: 'SaaS 개발 외주 — 요구사항 변경으로 비용 초과·납기 지연',
+      brief: '요구사항 범위(scope creep), 변경 관리, 마일스톤 검수, 잔금 지급',
+      applicant: '발주사 PM',
+      respondent: '개발사 대표',
+      keywords: 'scope creep, 마일스톤, 잔금',
+    },
+    en: {
+      title: 'Tech Platform',
+      desc: 'SaaS outsourcing — scope creep causing cost overrun and delay',
+      brief: 'Scope creep, change management, milestone acceptance, final payment',
+      applicant: 'Client PM',
+      respondent: 'Dev Agency CEO',
+      keywords: 'scope creep, milestone, payment',
+    },
+  },
+]
+
+const LEVEL_CONFIG = {
+  beginner: {
+    ko: { label: '초급', color: 'bg-green-100 text-green-700 border-green-200' },
+    en: { label: 'Beginner', color: 'bg-green-100 text-green-700 border-green-200' },
+  },
+  intermediate: {
+    ko: { label: '중급', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+    en: { label: 'Intermediate', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  },
+  advanced: {
+    ko: { label: '고급', color: 'bg-red-100 text-red-700 border-red-200' },
+    en: { label: 'Advanced', color: 'bg-red-100 text-red-700 border-red-200' },
+  },
+}
+
 // ─── i18n ───
 const T = {
   ko: {
@@ -16,11 +245,11 @@ const T = {
       badge: 'AI-Powered Mediation Training',
       headline1: '조정의 미래,',
       headline2: 'AI와 함께 시작하세요',
-      desc: '대한상사중재원과 Trinos가 함께 만든 차세대 AI 조정 훈련 시스템. 실전과 동일한 시뮬레이션으로 조정 역량을 비약적으로 향상시키세요.',
+      desc: '대한상사중재원과 Trinos가 함께 만든 차세대 AI 조정 훈련 시스템. 10가지 실전 시나리오로 조정 역량을 비약적으로 향상시키세요.',
       cta: '무료로 시작하기',
       ctaSub: '지금 바로 AI 조정 훈련을 체험하세요',
       stats: [
-        { value: '5+', label: '시나리오' },
+        { value: '10', label: '시나리오' },
         { value: '4', label: 'AI 페르소나' },
         { value: '실시간', label: '음성 대화' },
         { value: 'AI', label: '즉시 피드백' },
@@ -36,16 +265,17 @@ const T = {
         { icon: '🌐', title: '한국어 · 영어 지원', desc: '다국어 대응으로 국제 조정 역량까지 훈련할 수 있습니다.' },
       ],
     },
-    scenarios: {
+    scenarioSection: {
       title: '훈련 시나리오',
-      subtitle: '다양한 분쟁 유형을 실전처럼',
-      items: ['건설 분쟁', '금융 분쟁', '노동 분쟁', '지식재산 분쟁', '국제상사 분쟁'],
+      subtitle: '10가지 실전 분쟁 유형',
+      desc: '초급부터 고급까지, 다양한 분쟁 유형을 실전처럼 훈련하세요',
+      levelFilter: { all: '전체', beginner: '초급', intermediate: '중급', advanced: '고급' },
     },
     howItWorks: {
       title: '이용 방법',
       steps: [
         { step: '01', title: '등록', desc: '이름과 이메일로 간편하게 시작' },
-        { step: '02', title: '시나리오 선택', desc: 'AI가 분쟁 상황을 설정' },
+        { step: '02', title: '시나리오 선택', desc: '10개 분쟁 유형 중 선택' },
         { step: '03', title: '실전 조정', desc: '음성으로 실시간 조정 진행' },
         { step: '04', title: 'AI 피드백', desc: '역량 분석 및 개선점 제공' },
       ],
@@ -86,13 +316,14 @@ const T = {
       startBtn: '세션 시작',
       connecting: '연결 중...',
       ready: 'AI 조정 훈련 준비 완료',
-      readyDesc: '"세션 시작" 버튼을 누르면 AI 조정 상대방과 실전 시뮬레이션이 시작됩니다.',
-      scenarios: '5가지 시나리오',
-      scenarioDesc: '건설, 금융, 노동, 지식재산, 국제분쟁',
-      difficulty: '3단계 난이도',
-      difficultyDesc: '초급 → 중급 → 고급',
-      coaching: 'AI 코칭',
-      coachingDesc: '대화 종료 후 즉시 피드백',
+      readyDesc: '시나리오를 선택하고 "세션 시작"을 누르면 AI 조정 상대방과 실전 시뮬레이션이 시작됩니다.',
+      selectScenario: '시나리오 선택',
+      selectPrompt: '훈련할 분쟁 유형을 선택하세요',
+      selectedScenario: '선택된 시나리오',
+      change: '변경',
+      applicantLabel: '신청인',
+      respondentLabel: '피신청인',
+      keyIssues: '핵심 쟁점',
       transcriptWait: '대화가 시작되면 여기에 트랜스크립트가 표시됩니다.',
       micCheck: '마이크가 켜져 있는지 확인해주세요.',
       micError: '연결 오류가 발생했습니다. 마이크 접근을 허용했는지 확인해주세요.',
@@ -140,11 +371,11 @@ const T = {
       badge: 'AI-Powered Mediation Training',
       headline1: 'The Future of',
       headline2: 'Mediation Training',
-      desc: 'Built by KCAB and Trinos, Wing Mediator delivers next-generation AI-powered simulation for real-world mediation skill development.',
+      desc: 'Built by KCAB and Trinos, Wing Mediator delivers next-generation AI-powered simulation across 10 real-world dispute scenarios.',
       cta: 'Get Started Free',
       ctaSub: 'Experience AI mediation training now',
       stats: [
-        { value: '5+', label: 'Scenarios' },
+        { value: '10', label: 'Scenarios' },
         { value: '4', label: 'AI Personas' },
         { value: 'Live', label: 'Voice Chat' },
         { value: 'AI', label: 'Feedback' },
@@ -160,16 +391,17 @@ const T = {
         { icon: '🌐', title: 'Bilingual', desc: 'Korean & English support for developing international mediation capabilities.' },
       ],
     },
-    scenarios: {
+    scenarioSection: {
       title: 'Training Scenarios',
-      subtitle: 'Practice across diverse dispute types',
-      items: ['Commercial', 'Financial', 'Employment', 'IP Disputes', 'International'],
+      subtitle: '10 Real-World Dispute Types',
+      desc: 'From beginner to advanced, practice across diverse dispute categories',
+      levelFilter: { all: 'All', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' },
     },
     howItWorks: {
       title: 'How It Works',
       steps: [
         { step: '01', title: 'Register', desc: 'Quick start with name and email' },
-        { step: '02', title: 'Choose Scenario', desc: 'AI sets up the dispute context' },
+        { step: '02', title: 'Choose Scenario', desc: 'Select from 10 dispute types' },
         { step: '03', title: 'Live Mediation', desc: 'Voice-based real-time session' },
         { step: '04', title: 'AI Feedback', desc: 'Competency analysis and coaching' },
       ],
@@ -210,13 +442,14 @@ const T = {
       startBtn: 'Start Session',
       connecting: 'Connecting...',
       ready: 'AI Training Ready',
-      readyDesc: 'Press "Start Session" to begin a real-time simulation with an AI counterpart.',
-      scenarios: '5 Scenarios',
-      scenarioDesc: 'Commercial, Employment, Partnership, Real Estate, Medical',
-      difficulty: '3 Levels',
-      difficultyDesc: 'Beginner → Intermediate → Advanced',
-      coaching: 'AI Coaching',
-      coachingDesc: 'Instant feedback after each session',
+      readyDesc: 'Select a scenario and press "Start Session" to begin a real-time simulation with an AI counterpart.',
+      selectScenario: 'Select Scenario',
+      selectPrompt: 'Choose a dispute type to practice',
+      selectedScenario: 'Selected Scenario',
+      change: 'Change',
+      applicantLabel: 'Claimant',
+      respondentLabel: 'Respondent',
+      keyIssues: 'Key Issues',
       transcriptWait: 'Transcript will appear here once the conversation starts.',
       micCheck: 'Please make sure your microphone is enabled.',
       micError: 'Connection error. Please allow microphone access.',
@@ -266,7 +499,7 @@ async function api(path, options = {}) {
   return res.json()
 }
 
-// ─── Icons (inline SVG) ───
+// ─── Icons ───
 function WingLogo({ size = 32, className = '' }) {
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size }}>
@@ -282,22 +515,8 @@ function WingLogo({ size = 32, className = '' }) {
 function LangSwitch({ lang, setLang }) {
   return (
     <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full p-0.5 border border-white/10">
-      <button
-        onClick={() => setLang('ko')}
-        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
-          lang === 'ko' ? 'bg-white text-brand-700 shadow-sm' : 'text-white/70 hover:text-white'
-        }`}
-      >
-        한국어
-      </button>
-      <button
-        onClick={() => setLang('en')}
-        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
-          lang === 'en' ? 'bg-white text-brand-700 shadow-sm' : 'text-white/70 hover:text-white'
-        }`}
-      >
-        EN
-      </button>
+      <button onClick={() => setLang('ko')} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${lang === 'ko' ? 'bg-white text-brand-700 shadow-sm' : 'text-white/70 hover:text-white'}`}>한국어</button>
+      <button onClick={() => setLang('en')} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${lang === 'en' ? 'bg-white text-brand-700 shadow-sm' : 'text-white/70 hover:text-white'}`}>EN</button>
     </div>
   )
 }
@@ -305,27 +524,13 @@ function LangSwitch({ lang, setLang }) {
 function LangSwitchLight({ lang, setLang }) {
   return (
     <div className="flex items-center bg-gray-100 rounded-full p-0.5">
-      <button
-        onClick={() => setLang('ko')}
-        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
-          lang === 'ko' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-        }`}
-      >
-        한국어
-      </button>
-      <button
-        onClick={() => setLang('en')}
-        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
-          lang === 'en' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-        }`}
-      >
-        EN
-      </button>
+      <button onClick={() => setLang('ko')} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${lang === 'ko' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>한국어</button>
+      <button onClick={() => setLang('en')} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${lang === 'en' ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>EN</button>
     </div>
   )
 }
 
-// ─── Nav (transparent for landing, solid for inner pages) ───
+// ─── Nav ───
 function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
   const t = T[lang]
   const tabs = [
@@ -337,7 +542,7 @@ function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
 
   if (isLanding) {
     return (
-      <header className="fixed top-0 w-full z-50 transition-all duration-300">
+      <header className="fixed top-0 w-full z-50">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <WingLogo size={36} />
@@ -346,10 +551,7 @@ function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
           <div className="flex items-center gap-4">
             <LangSwitch lang={lang} setLang={setLang} />
             {user && (
-              <button
-                onClick={() => setTab('dashboard')}
-                className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/20 hover:bg-white/20 transition-all"
-              >
+              <button onClick={() => setTab('dashboard')} className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/20 hover:bg-white/20 transition-all">
                 {t.tabs.dashboard}
               </button>
             )}
@@ -368,15 +570,7 @@ function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
         </div>
         <nav className="flex gap-1">
           {tabs.map(tb => (
-            <button
-              key={tb.id}
-              onClick={() => setTab(tb.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                tab === tb.id
-                  ? 'bg-brand-50 text-brand-700'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
-              }`}
-            >
+            <button key={tb.id} onClick={() => setTab(tb.id)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${tab === tb.id ? 'bg-brand-50 text-brand-700' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'}`}>
               {tb.label}
             </button>
           ))}
@@ -397,17 +591,110 @@ function Nav({ tab, setTab, user, lang, setLang, isLanding }) {
   )
 }
 
+// ─── Scenario Picker (used in TrainTab) ───
+function ScenarioPicker({ lang, selected, onSelect }) {
+  const t = T[lang].train
+  const [filter, setFilter] = useState('all')
+  const filterLabels = T[lang].scenarioSection.levelFilter
+
+  const filtered = filter === 'all' ? SCENARIOS : SCENARIOS.filter(s => s.level === filter)
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h3 className="text-lg font-bold text-gray-900">{t.selectScenario}</h3>
+          <p className="text-sm text-gray-500 mt-0.5">{t.selectPrompt}</p>
+        </div>
+        <div className="flex gap-1.5">
+          {Object.entries(filterLabels).map(([key, label]) => (
+            <button key={key} onClick={() => setFilter(key)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filter === key ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        {filtered.map(scenario => {
+          const s = scenario[lang]
+          const lv = LEVEL_CONFIG[scenario.level][lang]
+          const isSelected = selected?.id === scenario.id
+          return (
+            <button
+              key={scenario.id}
+              onClick={() => onSelect(scenario)}
+              className={`text-left p-5 rounded-2xl border-2 transition-all duration-200 group ${
+                isSelected
+                  ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10'
+                  : 'border-gray-100 bg-white hover:border-brand-200 hover:shadow-sm'
+              }`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <span className="text-2xl">{scenario.icon}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
+              </div>
+              <h4 className={`font-bold text-sm mb-1.5 ${isSelected ? 'text-brand-700' : 'text-gray-900 group-hover:text-brand-700'} transition-colors`}>{s.title}</h4>
+              <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{s.desc}</p>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Scenario Detail Card ───
+function ScenarioDetail({ scenario, lang, onClear }) {
+  const t = T[lang].train
+  const s = scenario[lang]
+  const lv = LEVEL_CONFIG[scenario.level][lang]
+
+  return (
+    <div className="bg-gradient-to-r from-brand-50 to-white rounded-2xl border border-brand-100 p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">{scenario.icon}</span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-gray-900">{s.title}</h3>
+              <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
+            </div>
+            <p className="text-sm text-gray-500 mt-0.5">{s.brief}</p>
+          </div>
+        </div>
+        <button onClick={onClear} className="text-sm text-brand-600 hover:text-brand-700 font-medium">{t.change}</button>
+      </div>
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="bg-white/80 rounded-xl p-3">
+          <span className="text-xs font-medium text-blue-600">{t.applicantLabel}</span>
+          <p className="text-sm font-semibold text-gray-800 mt-0.5">{s.applicant}</p>
+        </div>
+        <div className="bg-white/80 rounded-xl p-3">
+          <span className="text-xs font-medium text-orange-600">{t.respondentLabel}</span>
+          <p className="text-sm font-semibold text-gray-800 mt-0.5">{s.respondent}</p>
+        </div>
+      </div>
+      <div className="mt-3">
+        <span className="text-xs font-medium text-gray-500">{t.keyIssues}</span>
+        <p className="text-xs text-gray-600 mt-0.5">{s.keywords}</p>
+      </div>
+    </div>
+  )
+}
+
 // ─── Home / Landing ───
 function HomeTab({ user, setUser, setTab, lang }) {
   const t = T[lang].login
   const tb = T[lang]
   const h = T[lang].hero
   const f = T[lang].features
-  const s = T[lang].scenarios
+  const ss = T[lang].scenarioSection
   const hw = T[lang].howItWorks
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [scenarioFilter, setScenarioFilter] = useState('all')
 
   const handleRegister = async (e) => {
     e.preventDefault()
@@ -429,59 +716,43 @@ function HomeTab({ user, setUser, setTab, lang }) {
     setLoading(false)
   }
 
-  // Logged-in user welcome
+  const filteredScenarios = scenarioFilter === 'all' ? SCENARIOS : SCENARIOS.filter(s => s.level === scenarioFilter)
+
   if (user) {
     return (
-      <>
-        {/* Hero for logged-in user */}
-        <section className="bg-hero-gradient relative overflow-hidden noise-overlay">
-          <div className="orb orb-1 animate-float" />
-          <div className="orb orb-2 animate-float-slow" />
-          <div className="relative max-w-6xl mx-auto px-6 pt-32 pb-20 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              {t.welcome(user.name)}
-            </h1>
-            <p className="text-lg text-white/60 mb-10">{t.startPrompt}</p>
-            <button
-              onClick={() => setTab('train')}
-              className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5"
-            >
-              {t.startBtn}
-            </button>
-          </div>
-        </section>
-      </>
+      <section className="bg-hero-gradient relative overflow-hidden noise-overlay">
+        <div className="orb orb-1 animate-float" />
+        <div className="orb orb-2 animate-float-slow" />
+        <div className="relative max-w-6xl mx-auto px-6 pt-32 pb-20 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{t.welcome(user.name)}</h1>
+          <p className="text-lg text-white/60 mb-10">{t.startPrompt}</p>
+          <button onClick={() => setTab('train')} className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5">
+            {t.startBtn}
+          </button>
+        </div>
+      </section>
     )
   }
 
-  // Full landing page for non-logged-in users
   return (
     <>
-      {/* ─── Hero Section ─── */}
+      {/* Hero */}
       <section className="bg-hero-gradient relative overflow-hidden noise-overlay min-h-screen flex items-center">
         <div className="orb orb-1 animate-float" />
         <div className="orb orb-2 animate-float-slow" />
         <div className="orb orb-3 animate-float" />
-
         <div className="relative max-w-6xl mx-auto px-6 pt-28 pb-20 w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left: Copy */}
             <div className="animate-slide-up">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10 mb-8">
                 <span className="w-2 h-2 bg-accent-teal rounded-full animate-pulse-soft" />
                 <span className="text-sm text-white/80 font-medium">{h.badge}</span>
               </div>
-
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight">
                 {h.headline1}<br />
                 <span className="text-gradient">{h.headline2}</span>
               </h1>
-
-              <p className="text-lg text-white/50 leading-relaxed max-w-xl mb-10">
-                {h.desc}
-              </p>
-
-              {/* Stats */}
+              <p className="text-lg text-white/50 leading-relaxed max-w-xl mb-10">{h.desc}</p>
               <div className="grid grid-cols-4 gap-4 mt-12">
                 {h.stats.map((stat, i) => (
                   <div key={i} className="text-center">
@@ -491,8 +762,6 @@ function HomeTab({ user, setUser, setTab, lang }) {
                 ))}
               </div>
             </div>
-
-            {/* Right: Login Form */}
             <div className="animate-fade-in">
               <div className="bg-glass rounded-3xl p-8 md:p-10 glow-brand">
                 <div className="text-center mb-8">
@@ -500,39 +769,22 @@ function HomeTab({ user, setUser, setTab, lang }) {
                   <h2 className="text-2xl font-bold text-white mb-2">{t.formTitle}</h2>
                   <p className="text-white/50 text-sm">{t.formDesc}</p>
                 </div>
-
                 <form onSubmit={handleRegister} className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-2">{t.nameLabel}</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      required
-                      placeholder={t.namePlaceholder}
-                      className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all"
-                    />
+                    <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder={t.namePlaceholder}
+                      className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-2">{t.emailLabel}</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      placeholder={t.emailPlaceholder}
-                      className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all"
-                    />
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder={t.emailPlaceholder}
+                      className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all" />
                   </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-bold text-base hover:shadow-lg hover:shadow-brand-500/30 disabled:opacity-50 transition-all duration-300 hover:-translate-y-0.5"
-                  >
+                  <button type="submit" disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-bold text-base hover:shadow-lg hover:shadow-brand-500/30 disabled:opacity-50 transition-all duration-300 hover:-translate-y-0.5">
                     {loading ? t.submitting : t.submit}
                   </button>
                 </form>
-
                 <p className="text-center text-white/30 text-xs mt-6">{h.ctaSub}</p>
               </div>
             </div>
@@ -540,18 +792,13 @@ function HomeTab({ user, setUser, setTab, lang }) {
         </div>
       </section>
 
-      {/* ─── Features Section ─── */}
-      <section className="py-24 bg-white relative">
+      {/* Features */}
+      <section className="py-24 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">
-              {f.title}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              {f.subtitle}
-            </h2>
+            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">{f.title}</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">{f.subtitle}</h2>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {f.items.map((item, i) => (
               <div key={i} className="card-hover bg-white rounded-2xl border border-gray-100 p-7 group">
@@ -564,24 +811,57 @@ function HomeTab({ user, setUser, setTab, lang }) {
         </div>
       </section>
 
-      {/* ─── How It Works ─── */}
-      <section className="py-24 bg-gray-50 relative">
+      {/* 10 Scenarios Showcase */}
+      <section className="py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              {hw.title}
-            </h2>
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">{ss.title}</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-3">{ss.subtitle}</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">{ss.desc}</p>
           </div>
 
+          <div className="flex justify-center gap-2 mb-10">
+            {Object.entries(ss.levelFilter).map(([key, label]) => (
+              <button key={key} onClick={() => setScenarioFilter(key)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${scenarioFilter === key ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredScenarios.map(scenario => {
+              const s = scenario[lang]
+              const lv = LEVEL_CONFIG[scenario.level][lang]
+              return (
+                <div key={scenario.id} className="card-hover bg-white rounded-2xl border border-gray-100 p-6 group">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">{scenario.icon}</span>
+                    <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-brand-700 transition-colors">{s.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4">{s.desc}</p>
+                  <div className="flex gap-2">
+                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{s.applicant}</span>
+                    <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full">{s.respondent}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">{hw.title}</h2>
+          </div>
           <div className="grid md:grid-cols-4 gap-8">
             {hw.steps.map((step, i) => (
               <div key={i} className="relative text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-600 text-white rounded-2xl text-xl font-bold mb-5 shadow-lg shadow-brand-500/20">
-                  {step.step}
-                </div>
-                {i < hw.steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-gradient-to-r from-brand-300 to-transparent" />
-                )}
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-600 text-white rounded-2xl text-xl font-bold mb-5 shadow-lg shadow-brand-500/20">{step.step}</div>
+                {i < hw.steps.length - 1 && <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-gradient-to-r from-brand-300 to-transparent" />}
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
                 <p className="text-sm text-gray-500">{step.desc}</p>
               </div>
@@ -590,46 +870,19 @@ function HomeTab({ user, setUser, setTab, lang }) {
         </div>
       </section>
 
-      {/* ─── Scenarios ─── */}
-      <section className="py-24 bg-white relative">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-brand-50 text-brand-600 text-sm font-semibold rounded-full mb-4">
-              {s.title}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              {s.subtitle}
-            </h2>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            {s.items.map((item, i) => (
-              <div key={i} className="card-hover px-8 py-5 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 text-center">
-                <span className="text-base font-semibold text-gray-800">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── CTA Section ─── */}
+      {/* CTA */}
       <section className="py-20 bg-hero-gradient relative overflow-hidden noise-overlay">
         <div className="orb orb-1 animate-float" style={{ opacity: 0.2 }} />
         <div className="relative max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">
-            {h.headline1} {h.headline2}
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">{h.headline1} {h.headline2}</h2>
           <p className="text-white/50 mb-10 max-w-xl mx-auto">{h.desc}</p>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5"
-          >
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="px-10 py-4 bg-white text-brand-700 rounded-full font-bold text-lg hover:shadow-xl hover:shadow-brand-500/20 transition-all duration-300 hover:-translate-y-0.5">
             {h.cta}
           </button>
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
+      {/* Footer */}
       <footer className="py-10 bg-navy-950 text-center">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -653,10 +906,7 @@ function DashboardTab({ user, lang }) {
 
   useEffect(() => {
     if (!user) return
-    api(`/api/usage/${user.id}`).then(data => {
-      setUsage(data)
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    api(`/api/usage/${user.id}`).then(data => { setUsage(data); setLoading(false) }).catch(() => setLoading(false))
   }, [user])
 
   if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
@@ -667,22 +917,18 @@ function DashboardTab({ user, lang }) {
   return (
     <div className="max-w-4xl mx-auto mt-10 space-y-6 px-6">
       <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
-
       <div className="grid grid-cols-3 gap-4">
-        <div className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">{t.remaining}</p>
-          <p className="text-3xl font-bold text-brand-600">{usage?.minutes_remaining ?? '-'}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
-        </div>
-        <div className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">{t.used}</p>
-          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_used ?? 0}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
-        </div>
-        <div className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">{t.total}</p>
-          <p className="text-3xl font-bold text-gray-900">{usage?.minutes_allocated ?? 60}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
-        </div>
+        {[
+          { label: t.remaining, value: usage?.minutes_remaining ?? '-', accent: true },
+          { label: t.used, value: usage?.minutes_used ?? 0 },
+          { label: t.total, value: usage?.minutes_allocated ?? 60 },
+        ].map((item, i) => (
+          <div key={i} className="card-hover bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            <p className="text-sm text-gray-500 mb-1">{item.label}</p>
+            <p className={`text-3xl font-bold ${item.accent ? 'text-brand-600' : 'text-gray-900'}`}>{item.value}<span className="text-base font-medium text-gray-400 ml-1">{t.min}</span></p>
+          </div>
+        ))}
       </div>
-
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
         <div className="flex justify-between text-sm mb-3">
           <span className="text-gray-500">{t.monthUsage}</span>
@@ -692,7 +938,6 @@ function DashboardTab({ user, lang }) {
           <div className="h-full bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
         </div>
       </div>
-
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
         <h3 className="font-semibold text-gray-900 mb-4">{t.recentSessions}</h3>
         {usage?.sessions?.length > 0 ? (
@@ -705,9 +950,7 @@ function DashboardTab({ user, lang }) {
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-gray-700">{s.duration_minutes ?? '-'}{t.min}</p>
-                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                    s.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
-                  }`}>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${s.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
                     {s.status === 'completed' ? t.completed : t.inProgress}
                   </span>
                 </div>
@@ -756,6 +999,7 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
   const t = T[lang].train
   const tl = T[lang].login
   const PERSONAS = getPersonas(lang)
+  const [selectedScenario, setSelectedScenario] = useState(null)
   const [sessionId, setSessionId] = useState(null)
   const [active, setActive] = useState(false)
   const [starting, setStarting] = useState(false)
@@ -779,18 +1023,18 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
     }])
   }, [lang])
 
-  const flushPending = useCallback(() => {
-    const items = pendingRef.current.splice(0)
-    items.forEach(({ text, persona }) => addMessage('agent', text, persona))
-  }, [addMessage])
-
   const startSession = async () => {
     if (!user) return alert(tl.loginFirst)
+    if (!selectedScenario) return
     setStarting(true)
     try {
       const data = await api('/api/session/start', {
         method: 'POST',
-        body: JSON.stringify({ user_id: user.id }),
+        body: JSON.stringify({
+          user_id: user.id,
+          scenario_id: selectedScenario.id,
+          scenario_title: selectedScenario[lang].title,
+        }),
       })
       if (!data.success) { alert(data.error || t.sessionFail); setStarting(false); return }
       if (data.remaining_minutes <= 0) { alert(t.noTime); setStarting(false); return }
@@ -800,9 +1044,17 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
       pendingRef.current = []
       speakingRef.current = false
 
+      // Build scenario context string for ElevenLabs dynamic variables
+      const sc = selectedScenario[lang]
+      const scenarioContext = `[SCENARIO: ${sc.title}] ${sc.brief}. Applicant: ${sc.applicant}. Respondent: ${sc.respondent}. Key issues: ${sc.keywords}.`
+
       const { Conversation } = await import('@11labs/client')
       const conversation = await Conversation.startSession({
         agentId: AGENT_ID,
+        dynamicVariables: {
+          scenario: scenarioContext,
+          scenario_id: selectedScenario.id,
+        },
         onConnect: () => { setStatus('connected'); setActive(true) },
         onDisconnect: () => {
           if (pendingRef.current.length > 0) {
@@ -880,42 +1132,57 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
   if (!user) return <p className="text-center mt-20 text-gray-500">{tl.loginFirst}</p>
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 px-6">
+    <div className="max-w-5xl mx-auto mt-10 px-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
         {active ? (
           <button onClick={endSession} className="px-6 py-2.5 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-all hover:shadow-lg hover:shadow-red-500/20">{t.endBtn}</button>
         ) : (
-          <button onClick={startSession} disabled={starting} className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-full font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-50 transition-all">
+          <button onClick={startSession} disabled={starting || !selectedScenario}
+            className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-full font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
             {starting ? t.connecting : t.startBtn}
           </button>
         )}
       </div>
 
-      {active && (
-        <div className="flex gap-2 mb-3 flex-wrap">
-          {Object.entries(PERSONAS).filter(([k]) => k !== 'unknown').map(([key, p]) => (
-            <span key={key} className={`text-xs px-2.5 py-1 rounded-full ${p.badge} font-medium`}>{p.label}</span>
-          ))}
-          <span className="text-xs px-2.5 py-1 rounded-full bg-brand-100 text-brand-600 font-medium">{t.me}</span>
+      {/* Scenario selection area (shown before session starts) */}
+      {!active && (
+        <div className="mb-6">
+          {selectedScenario ? (
+            <ScenarioDetail scenario={selectedScenario} lang={lang} onClear={() => setSelectedScenario(null)} />
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+              <ScenarioPicker lang={lang} selected={selectedScenario} onSelect={setSelectedScenario} />
+            </div>
+          )}
         </div>
       )}
 
+      {/* Active session: scenario badge + persona legend */}
+      {active && selectedScenario && (
+        <div className="mb-3">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-lg">{selectedScenario.icon}</span>
+            <span className="font-semibold text-gray-800 text-sm">{selectedScenario[lang].title}</span>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {Object.entries(PERSONAS).filter(([k]) => k !== 'unknown').map(([key, p]) => (
+              <span key={key} className={`text-xs px-2.5 py-1 rounded-full ${p.badge} font-medium`}>{p.label}</span>
+            ))}
+            <span className="text-xs px-2.5 py-1 rounded-full bg-brand-100 text-brand-600 font-medium">{t.me}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Chat area */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm" style={{ minHeight: '500px' }}>
         {active ? (
           <div className="flex flex-col h-full" style={{ minHeight: '500px' }}>
             <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-100 bg-gray-50/80">
-              <div className={`w-3 h-3 rounded-full transition-colors ${
-                status === 'speaking' ? 'bg-blue-400 animate-pulse' :
-                status === 'listening' ? 'bg-green-400 animate-pulse' : 'bg-amber-400'
-              }`} />
-              <span className={`text-sm font-medium ${
-                status === 'speaking' ? 'text-blue-600' :
-                status === 'listening' ? 'text-green-600' : 'text-amber-600'
-              }`}>{statusLabel}</span>
+              <div className={`w-3 h-3 rounded-full transition-colors ${status === 'speaking' ? 'bg-blue-400 animate-pulse' : status === 'listening' ? 'bg-green-400 animate-pulse' : 'bg-amber-400'}`} />
+              <span className={`text-sm font-medium ${status === 'speaking' ? 'text-blue-600' : status === 'listening' ? 'text-green-600' : 'text-amber-600'}`}>{statusLabel}</span>
               {sessionId && <span className="text-xs text-gray-400 ml-auto font-mono">ID: {sessionId.slice(0, 12)}...</span>}
             </div>
-
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-2" style={{ maxHeight: '400px' }}>
               {messages.length === 0 && (
                 <div className="text-center text-gray-400 text-sm mt-10">
@@ -933,9 +1200,7 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
                         : `${ps.bg} ${ps.border} ${ps.text}`
                     }`}>
                       <div className="flex items-center gap-2 mb-0.5">
-                        {msg.role === 'agent' && ps && (
-                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${ps.badge}`}>{ps.label}</span>
-                        )}
+                        {msg.role === 'agent' && ps && <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${ps.badge}`}>{ps.label}</span>}
                         {msg.role === 'user' && <span className="text-xs font-medium text-blue-100">{t.me}</span>}
                         {msg.role === 'system' && <span className="text-xs font-medium text-red-400">{t.system}</span>}
                         <span className={`text-xs ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>{msg.time}</span>
@@ -946,24 +1211,15 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
                 )
               })}
             </div>
-
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex items-center justify-center gap-3">
               {status === 'listening' ? (
                 <>
-                  <div className="flex gap-1 items-center">
-                    {[0,1,2,3,4].map((i) => (
-                      <div key={i} className="w-1 bg-green-400 rounded-full animate-pulse" style={{ height: `${12 + Math.random() * 12}px`, animationDelay: `${i * 0.1}s` }} />
-                    ))}
-                  </div>
+                  <div className="flex gap-1 items-center">{[0,1,2,3,4].map(i => <div key={i} className="w-1 bg-green-400 rounded-full animate-pulse" style={{ height: `${12 + Math.random() * 12}px`, animationDelay: `${i * 0.1}s` }} />)}</div>
                   <span className="text-sm text-green-600 font-medium">{t.speak}</span>
                 </>
               ) : status === 'speaking' ? (
                 <>
-                  <div className="flex gap-1 items-center">
-                    {[0,1,2,3,4].map((i) => (
-                      <div key={i} className="w-1 bg-blue-400 rounded-full animate-pulse" style={{ height: `${12 + Math.random() * 12}px`, animationDelay: `${i * 0.1}s` }} />
-                    ))}
-                  </div>
+                  <div className="flex gap-1 items-center">{[0,1,2,3,4].map(i => <div key={i} className="w-1 bg-blue-400 rounded-full animate-pulse" style={{ height: `${12 + Math.random() * 12}px`, animationDelay: `${i * 0.1}s` }} />)}</div>
                   <span className="text-sm text-blue-600 font-medium">{t.aiSpeaking}</span>
                 </>
               ) : (
@@ -971,7 +1227,7 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
               )}
             </div>
           </div>
-        ) : (
+        ) : !selectedScenario ? (
           <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-brand-50 to-brand-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
               <svg className="w-10 h-10 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -979,21 +1235,14 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">{t.ready}</h3>
-            <p className="text-gray-500 mb-2 max-w-md">{t.readyDesc}</p>
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-left max-w-lg">
-              <div className="card-hover bg-gray-50 rounded-xl p-5 border border-gray-100">
-                <p className="font-semibold text-gray-800 mb-1">{t.scenarios}</p>
-                <p className="text-gray-400 text-xs">{t.scenarioDesc}</p>
-              </div>
-              <div className="card-hover bg-gray-50 rounded-xl p-5 border border-gray-100">
-                <p className="font-semibold text-gray-800 mb-1">{t.difficulty}</p>
-                <p className="text-gray-400 text-xs">{t.difficultyDesc}</p>
-              </div>
-              <div className="card-hover bg-gray-50 rounded-xl p-5 border border-gray-100">
-                <p className="font-semibold text-gray-800 mb-1">{t.coaching}</p>
-                <p className="text-gray-400 text-xs">{t.coachingDesc}</p>
-              </div>
-            </div>
+            <p className="text-gray-500 max-w-md">{t.readyDesc}</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <span className="text-5xl mb-4">{selectedScenario.icon}</span>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">{selectedScenario[lang].title}</h3>
+            <p className="text-gray-500 max-w-md mb-6">{selectedScenario[lang].brief}</p>
+            <p className="text-sm text-brand-600 font-medium">{t.readyDesc}</p>
           </div>
         )}
       </div>
@@ -1009,25 +1258,16 @@ function FeedbackTab({ user, initialSessionId, lang }) {
   const [feedback, setFeedback] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (initialSessionId && initialSessionId !== sessionId) setSessionId(initialSessionId)
-  }, [initialSessionId])
-
-  useEffect(() => {
-    if (initialSessionId && !feedback && !loading) generateFeedback()
-  }, [initialSessionId])
+  useEffect(() => { if (initialSessionId && initialSessionId !== sessionId) setSessionId(initialSessionId) }, [initialSessionId])
+  useEffect(() => { if (initialSessionId && !feedback && !loading) generateFeedback() }, [initialSessionId])
 
   const generateFeedback = async () => {
     const sid = sessionId || initialSessionId
     if (!sid?.trim()) return alert(t.enterSession)
     setLoading(true)
     try {
-      const data = await api('/api/feedback/generate', {
-        method: 'POST',
-        body: JSON.stringify({ session_id: sessionId }),
-      })
-      if (data.success) { setFeedback(data.feedback) }
-      else { alert(data.error || t.fail) }
+      const data = await api('/api/feedback/generate', { method: 'POST', body: JSON.stringify({ session_id: sessionId }) })
+      if (data.success) { setFeedback(data.feedback) } else { alert(data.error || t.fail) }
     } catch (err) { alert(tl.serverError) }
     setLoading(false)
   }
@@ -1047,19 +1287,17 @@ function FeedbackTab({ user, initialSessionId, lang }) {
   return (
     <div className="max-w-4xl mx-auto mt-10 space-y-6 px-6">
       <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
-
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
         <label className="block text-sm font-medium text-gray-700 mb-2">{t.sessionId}</label>
         <div className="flex gap-3">
-          <input type="text" value={sessionId} onChange={e => setSessionId(e.target.value)}
-            placeholder="ses_..." className="flex-1 px-5 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 outline-none transition-all" />
+          <input type="text" value={sessionId} onChange={e => setSessionId(e.target.value)} placeholder="ses_..."
+            className="flex-1 px-5 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 outline-none transition-all" />
           <button onClick={generateFeedback} disabled={loading}
             className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-50 transition-all">
             {loading ? t.generating : t.generate}
           </button>
         </div>
       </div>
-
       {feedback && (
         <div className="space-y-4">
           {feedback.demo_notice && (
@@ -1068,7 +1306,6 @@ function FeedbackTab({ user, initialSessionId, lang }) {
               <p className="text-sm text-amber-700">{feedback.demo_notice}</p>
             </div>
           )}
-
           <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
             <h3 className="font-semibold text-gray-900">{t.scores}</h3>
             <ScoreBar label={t.listening} score={feedback.scores?.listening ?? 0} />
@@ -1077,37 +1314,22 @@ function FeedbackTab({ user, initialSessionId, lang }) {
             <ScoreBar label={t.interests} score={feedback.scores?.interests ?? 0} />
             <ScoreBar label={t.resolution} score={feedback.scores?.resolution ?? 0} />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
               <h3 className="font-semibold text-green-600 mb-3">{t.strengths}</h3>
-              <ul className="space-y-2">
-                {(feedback.strengths || []).map((s, i) => (
-                  <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-green-500 shrink-0">✓</span> {s}</li>
-                ))}
-              </ul>
+              <ul className="space-y-2">{(feedback.strengths || []).map((s, i) => <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-green-500 shrink-0">✓</span> {s}</li>)}</ul>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
               <h3 className="font-semibold text-amber-600 mb-3">{t.improvements}</h3>
-              <ul className="space-y-2">
-                {(feedback.improvements || []).map((s, i) => (
-                  <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-amber-500 shrink-0">→</span> {s}</li>
-                ))}
-              </ul>
+              <ul className="space-y-2">{(feedback.improvements || []).map((s, i) => <li key={i} className="text-sm text-gray-700 flex gap-2"><span className="text-amber-500 shrink-0">→</span> {s}</li>)}</ul>
             </div>
           </div>
-
           {feedback.techniques_available?.length > 0 && (
             <div className="bg-brand-50 rounded-2xl p-6 border border-brand-100">
               <h3 className="font-semibold text-brand-700 mb-3">{t.techniques}</h3>
-              <div className="flex flex-wrap gap-2">
-                {feedback.techniques_available.map((tc, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-white text-brand-600 text-sm rounded-lg border border-brand-200 font-medium">{tc}</span>
-                ))}
-              </div>
+              <div className="flex flex-wrap gap-2">{feedback.techniques_available.map((tc, i) => <span key={i} className="px-3 py-1.5 bg-white text-brand-600 text-sm rounded-lg border border-brand-200 font-medium">{tc}</span>)}</div>
             </div>
           )}
-
           {feedback.overall && (
             <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-2">{t.overall}</h3>
@@ -1140,7 +1362,7 @@ export default function Home() {
       </main>
       {!isLanding && (
         <footer className="fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-gray-100 py-3 text-center text-xs text-gray-400">
-          Wing Mediator v0.1 — Powered by Trinos {lang === 'ko' ? '× KCAB' : 'AI'}
+          Wing Mediator v0.2 — Powered by Trinos {lang === 'ko' ? '× KCAB' : 'AI'}
         </footer>
       )}
     </div>
