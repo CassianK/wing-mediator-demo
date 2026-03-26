@@ -2,7 +2,7 @@ import './globals.css'
 
 export const metadata = {
   title: 'Wing Mediator — AI-Powered Mediation Training',
-  description: 'AI 기반 실전 조정 역량 훈련 시스템 by Trinos × KCAB',
+  description: 'AI 기반 실전 조정 역량 훈련 시스템 by Trinos',
 }
 
 export default function RootLayout({ children }) {

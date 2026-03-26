@@ -5,6 +5,20 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 const API_BASE = 'https://wmediator.trinos.group'
 const AGENT_ID = 'agent_1201km3k1xa0ee0bc2j2zdpp5rr6'
 
+// ─── Allowed Emails (whitelist) ───
+// 이 배열에 포함된 이메일만 등록/사용 가능합니다.
+// 추가/삭제 후 재배포하면 즉시 반영됩니다.
+const ALLOWED_EMAILS = [
+  'dkkim@swonlaw.com',
+  'dk@trinos.group',
+  // ─── KCAB 조정 강의 수강생 이메일을 아래에 추가하세요 ───
+  // 'student1@example.com',
+  // 'student2@example.com',
+]
+
+// 1시간 = 60분 총 사용 가능 시간
+const MAX_MINUTES = 60
+
 // ─── Scenarios ───
 const SCENARIOS = [
   {
@@ -239,15 +253,15 @@ const T = {
   ko: {
     brand: 'Wing Mediator',
     subtitle: 'AI 기반 실전 조정 역량 훈련',
-    partner: 'KCAB × Trinos',
+    partner: 'Powered by Trinos',
     tabs: { home: '홈', dashboard: '대시보드', train: '훈련', feedback: '피드백' },
     hero: {
       badge: 'AI-Powered Mediation Training',
       headline1: '조정의 미래,',
       headline2: 'AI와 함께 시작하세요',
-      desc: '대한상사중재원과 Trinos가 함께 만든 차세대 AI 조정 훈련 시스템. 10가지 실전 시나리오로 조정 역량을 비약적으로 향상시키세요.',
+      desc: 'Trinos가 개발한 차세대 AI 조정 훈련 시스템. 10가지 실전 시나리오로 조정 역량을 비약적으로 향상시키세요.',
       cta: '무료로 시작하기',
-      ctaSub: '지금 바로 AI 조정 훈련을 체험하세요',
+      ctaSub: '사전 등록된 이메일로 로그인하세요',
       stats: [
         { value: '10', label: '시나리오' },
         { value: '4', label: 'AI 페르소나' },
@@ -294,7 +308,10 @@ const T = {
       registerFail: '등록 실패',
       serverError: '서버 연결 오류',
       formTitle: '훈련 시작',
-      formDesc: '간편 등록 후 바로 AI 조정 훈련을 체험하세요.',
+      formDesc: '사전 등록된 이메일로 로그인하세요.',
+      notAllowed: '등록되지 않은 이메일입니다. 관리자에게 문의하세요.',
+      timeExpired: '사용 시간(1시간)이 모두 소진되었습니다.',
+      timeRemaining: (min) => `잔여 시간: ${min}분`,
     },
     dash: {
       title: '대시보드',
@@ -365,15 +382,15 @@ const T = {
   en: {
     brand: 'Wing Mediator',
     subtitle: 'AI-Powered Negotiation & Mediation Training',
-    partner: 'Trinos AI',
+    partner: 'Powered by Trinos',
     tabs: { home: 'Home', dashboard: 'Dashboard', train: 'Training', feedback: 'Feedback' },
     hero: {
       badge: 'AI-Powered Mediation Training',
       headline1: 'The Future of',
       headline2: 'Mediation Training',
-      desc: 'Built by KCAB and Trinos, Wing Mediator delivers next-generation AI-powered simulation across 10 real-world dispute scenarios.',
+      desc: 'Built by Trinos, Wing Mediator delivers next-generation AI-powered simulation across 10 real-world dispute scenarios.',
       cta: 'Get Started Free',
-      ctaSub: 'Experience AI mediation training now',
+      ctaSub: 'Sign in with your pre-registered email',
       stats: [
         { value: '10', label: 'Scenarios' },
         { value: '4', label: 'AI Personas' },
@@ -420,7 +437,10 @@ const T = {
       registerFail: 'Registration failed',
       serverError: 'Server connection error',
       formTitle: 'Start Training',
-      formDesc: 'Register quickly and experience AI mediation training.',
+      formDesc: 'Sign in with your pre-registered email.',
+      notAllowed: 'This email is not registered. Please contact the administrator.',
+      timeExpired: 'Your usage time (1 hour) has been fully consumed.',
+      timeRemaining: (min) => `Time remaining: ${min} min`,
     },
     dash: {
       title: 'Dashboard',
@@ -696,22 +716,33 @@ function HomeTab({ user, setUser, setTab, lang }) {
   const [loading, setLoading] = useState(false)
   const [scenarioFilter, setScenarioFilter] = useState('all')
 
+  const [authError, setAuthError] = useState('')
+
   const handleRegister = async (e) => {
     e.preventDefault()
+    setAuthError('')
+
+    // Whitelist check (case-insensitive)
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!ALLOWED_EMAILS.some(allowed => allowed.toLowerCase() === normalizedEmail)) {
+      setAuthError(t.notAllowed)
+      return
+    }
+
     setLoading(true)
     try {
       const data = await api('/api/user/register', {
         method: 'POST',
-        body: JSON.stringify({ name, email, role: 'student', institution: 'KCAB' }),
+        body: JSON.stringify({ name, email: normalizedEmail, role: 'student', institution: 'Wing Mediator MVP' }),
       })
       if (data.success) {
         setUser({ id: data.user_id, name: data.name, email: data.email })
         setTab('dashboard')
       } else {
-        alert(data.error || t.registerFail)
+        setAuthError(data.error || t.registerFail)
       }
     } catch (err) {
-      alert(t.serverError)
+      setAuthError(t.serverError)
     }
     setLoading(false)
   }
@@ -770,14 +801,20 @@ function HomeTab({ user, setUser, setTab, lang }) {
                   <p className="text-white/50 text-sm">{t.formDesc}</p>
                 </div>
                 <form onSubmit={handleRegister} className="space-y-5">
+                  {authError && (
+                    <div className="bg-red-500/20 border border-red-400/30 rounded-xl px-4 py-3 flex items-start gap-2">
+                      <span className="text-red-300 shrink-0 mt-0.5">⚠</span>
+                      <p className="text-sm text-red-200">{authError}</p>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-2">{t.nameLabel}</label>
-                    <input type="text" value={name} onChange={e => setName(e.target.value)} required placeholder={t.namePlaceholder}
+                    <input type="text" value={name} onChange={e => { setName(e.target.value); setAuthError('') }} required placeholder={t.namePlaceholder}
                       className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-2">{t.emailLabel}</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder={t.emailPlaceholder}
+                    <input type="email" value={email} onChange={e => { setEmail(e.target.value); setAuthError('') }} required placeholder={t.emailPlaceholder}
                       className="w-full px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400/50 outline-none transition-all" />
                   </div>
                   <button type="submit" disabled={loading}
@@ -1005,10 +1042,19 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
   const [starting, setStarting] = useState(false)
   const [messages, setMessages] = useState([])
   const [status, setStatus] = useState('idle')
+  const [remainingMin, setRemainingMin] = useState(null)
   const conversationRef = useRef(null)
   const scrollRef = useRef(null)
   const pendingRef = useRef([])
   const speakingRef = useRef(false)
+
+  // Fetch remaining time on mount
+  useEffect(() => {
+    if (!user) return
+    api(`/api/usage/${user.id}`).then(data => {
+      if (data) setRemainingMin(data.minutes_remaining ?? MAX_MINUTES)
+    }).catch(() => {})
+  }, [user])
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -1037,7 +1083,8 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
         }),
       })
       if (!data.success) { alert(data.error || t.sessionFail); setStarting(false); return }
-      if (data.remaining_minutes <= 0) { alert(t.noTime); setStarting(false); return }
+      if (data.remaining_minutes <= 0) { setRemainingMin(0); alert(t.noTime); setStarting(false); return }
+      setRemainingMin(data.remaining_minutes)
       setSessionId(data.session_id)
       setMessages([])
       setStatus('connecting')
@@ -1118,6 +1165,12 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
     if (endedId) {
       await api('/api/session/end', { method: 'POST', body: JSON.stringify({ session_id: endedId }) })
     }
+    // Refresh remaining time
+    if (user) {
+      api(`/api/usage/${user.id}`).then(data => {
+        if (data) setRemainingMin(data.minutes_remaining ?? 0)
+      }).catch(() => {})
+    }
     setActive(false); setSessionId(null); setStatus('idle')
     if (onSessionEnd) onSessionEnd(endedId)
     setTab('feedback')
@@ -1134,9 +1187,25 @@ function TrainTab({ user, setTab, onSessionEnd, lang }) {
   return (
     <div className="max-w-5xl mx-auto mt-10 px-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold text-gray-900">{t.title}</h2>
+          {remainingMin !== null && (
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
+              remainingMin > 15 ? 'bg-green-50 text-green-700 border border-green-200' :
+              remainingMin > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+              'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              {tl.timeRemaining(remainingMin)}
+            </div>
+          )}
+        </div>
         {active ? (
           <button onClick={endSession} className="px-6 py-2.5 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-all hover:shadow-lg hover:shadow-red-500/20">{t.endBtn}</button>
+        ) : remainingMin !== null && remainingMin <= 0 ? (
+          <div className="px-6 py-2.5 bg-gray-100 text-gray-400 rounded-full font-medium cursor-not-allowed">
+            {tl.timeExpired}
+          </div>
         ) : (
           <button onClick={startSession} disabled={starting || !selectedScenario}
             className="px-6 py-2.5 bg-gradient-to-r from-brand-500 to-brand-700 text-white rounded-full font-medium hover:shadow-lg hover:shadow-brand-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
@@ -1362,7 +1431,7 @@ export default function Home() {
       </main>
       {!isLanding && (
         <footer className="fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-gray-100 py-3 text-center text-xs text-gray-400">
-          Wing Mediator v0.2 — Powered by Trinos {lang === 'ko' ? '× KCAB' : 'AI'}
+          Wing Mediator v0.3 — Powered by Trinos
         </footer>
       )}
     </div>
