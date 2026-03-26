@@ -562,9 +562,9 @@ async function api(path, options = {}) {
 function WingLogo({ size = 32, className = '' }) {
   return (
     <img
-      src="/images/branding/logo-app-icon.png"
+      src="/images/branding/logo-wing.png"
       alt="Wing Mediator"
-      className={`rounded-xl object-contain ${className}`}
+      className={`object-contain ${className}`}
       style={{ width: size, height: size }}
     />
   )
