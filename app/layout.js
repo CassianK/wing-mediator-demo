@@ -1,6 +1,7 @@
 import './globals.css'
 
 export const metadata = {
+  metadataBase: new URL('https://app.wmediator.trinos.group'),
   title: 'Wing Mediator — AI-Powered Mediation Training',
   description: 'AI 기반 실전 조정 역량 훈련 시스템 by Trinos',
   icons: {
