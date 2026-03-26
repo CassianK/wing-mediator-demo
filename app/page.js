@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import Image from 'next/image'
 
 const API_BASE = 'https://wmediator.trinos.group'
 const AGENT_ID = 'agent_1201km3k1xa0ee0bc2j2zdpp5rr6'
@@ -231,6 +232,28 @@ const SCENARIOS = [
       keywords: 'scope creep, milestone, payment',
     },
   },
+]
+
+// ─── Scenario ID → Image file mapping ───
+const SCENARIO_IMAGES = {
+  construction: '/images/scenarios/scenario-construction.png',
+  financial: '/images/scenarios/scenario-financial.png',
+  employment: '/images/scenarios/scenario-employment.png',
+  ip: '/images/scenarios/scenario-ip.png',
+  international: '/images/scenarios/scenario-intl-trade.png',
+  realestate: '/images/scenarios/scenario-real-estate.png',
+  medical: '/images/scenarios/scenario-medical.png',
+  consumer: '/images/scenarios/scenario-consumer.png',
+  ma: '/images/scenarios/scenario-ai-privacy.png',
+  tech: '/images/scenarios/scenario-it-tech.png',
+}
+
+// ─── Feature icon mapping (index-based) ───
+const FEATURE_IMAGES = [
+  '/images/icons/icon-voice-mic-v2.png',      // 실시간 음성 대화
+  '/images/icons/icon-users-group.png',        // 4가지 AI 페르소나
+  '/images/icons/icon-radar-assessment.png',   // AI 역량 분석
+  '/images/icons/icon-bilingual-ko-en.png',    // 한국어·영어 지원
 ]
 
 const LEVEL_CONFIG = {
@@ -683,7 +706,11 @@ function ScenarioPicker({ lang, selected, onSelect }) {
               }`}
             >
               <div className="flex items-start justify-between mb-2 sm:mb-3">
-                <span className="text-xl sm:text-2xl">{scenario.icon}</span>
+                {SCENARIO_IMAGES[scenario.id] ? (
+                  <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-contain bg-navy-950/90" />
+                ) : (
+                  <span className="text-xl sm:text-2xl">{scenario.icon}</span>
+                )}
                 <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
               </div>
               <h4 className={`font-bold text-xs sm:text-sm mb-1 sm:mb-1.5 ${isSelected ? 'text-brand-700' : 'text-gray-900 group-hover:text-brand-700'} transition-colors`}>{s.title}</h4>
@@ -706,7 +733,11 @@ function ScenarioDetail({ scenario, lang, onClear }) {
     <div className="bg-gradient-to-r from-brand-50 to-white rounded-xl sm:rounded-2xl border border-brand-100 p-4 sm:p-6">
       <div className="flex items-start justify-between mb-3 sm:mb-4">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <span className="text-2xl sm:text-3xl shrink-0">{scenario.icon}</span>
+          {SCENARIO_IMAGES[scenario.id] ? (
+            <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-contain bg-navy-950/90 shrink-0" />
+          ) : (
+            <span className="text-2xl sm:text-3xl shrink-0">{scenario.icon}</span>
+          )}
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-bold text-sm sm:text-base text-gray-900">{s.title}</h3>
@@ -871,7 +902,13 @@ function HomeTab({ user, setUser, setTab, lang }) {
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {f.items.map((item, i) => (
               <div key={i} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-7 group">
-                <div className="text-2xl sm:text-4xl mb-3 sm:mb-5">{item.icon}</div>
+                <div className="mb-3 sm:mb-5">
+                  {FEATURE_IMAGES[i] ? (
+                    <img src={FEATURE_IMAGES[i]} alt={item.title} className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl object-contain" />
+                  ) : (
+                    <span className="text-2xl sm:text-4xl">{item.icon}</span>
+                  )}
+                </div>
                 <h3 className="text-sm sm:text-lg font-bold text-gray-900 mb-1.5 sm:mb-3 group-hover:text-brand-700 transition-colors">{item.title}</h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
@@ -904,7 +941,11 @@ function HomeTab({ user, setUser, setTab, lang }) {
               return (
                 <div key={scenario.id} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6 group">
                   <div className="flex items-start justify-between mb-3 sm:mb-4">
-                    <span className="text-2xl sm:text-3xl">{scenario.icon}</span>
+                    {SCENARIO_IMAGES[scenario.id] ? (
+                      <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-contain bg-navy-950/90" />
+                    ) : (
+                      <span className="text-2xl sm:text-3xl">{scenario.icon}</span>
+                    )}
                     <span className={`text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border font-medium ${lv.color}`}>{lv.label}</span>
                   </div>
                   <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5 sm:mb-2 group-hover:text-brand-700 transition-colors">{s.title}</h3>
