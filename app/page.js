@@ -722,8 +722,8 @@ function ScenarioPicker({ lang, selected, onSelect }) {
               }`}
             >
               {SCENARIO_IMAGES[scenario.id] && (
-                <div className={`w-full aspect-square rounded-lg sm:rounded-xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} mb-2 sm:mb-3 overflow-hidden`}>
-                  <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-cover" />
+                <div className={`w-full aspect-square rounded-lg sm:rounded-xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} mb-2 sm:mb-3 overflow-hidden p-2`}>
+                  <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-contain" />
                 </div>
               )}
               <div className="flex items-center justify-between mb-1 sm:mb-1.5">
@@ -749,8 +749,8 @@ function ScenarioDetail({ scenario, lang, onClear }) {
     <div className="bg-gradient-to-r from-brand-50 to-white rounded-xl sm:rounded-2xl border border-brand-100 p-4 sm:p-6">
       <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
         {SCENARIO_IMAGES[scenario.id] && (
-          <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} shrink-0 overflow-hidden`}>
-            <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-cover" />
+          <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} shrink-0 overflow-hidden p-1.5`}>
+            <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-contain" />
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -924,7 +924,7 @@ function HomeTab({ user, setUser, setTab, lang }) {
             {f.items.map((item, i) => (
               <div key={i} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-7 group">
                 {FEATURE_IMAGES[i] && (
-                  <div className={`w-full aspect-[4/3] rounded-lg sm:rounded-xl ${FEATURE_BG[i] || 'bg-gray-50'} flex items-center justify-center mb-3 sm:mb-5 overflow-hidden p-4 sm:p-6`}>
+                  <div className={`w-full aspect-[4/3] rounded-lg sm:rounded-xl ${FEATURE_BG[i] || 'bg-gray-50'} flex items-center justify-center mb-3 sm:mb-5 overflow-hidden p-3`}>
                     <img src={FEATURE_IMAGES[i]} alt={item.title} className="w-full h-full object-contain" />
                   </div>
                 )}
@@ -960,8 +960,8 @@ function HomeTab({ user, setUser, setTab, lang }) {
               return (
                 <div key={scenario.id} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden group">
                   {SCENARIO_IMAGES[scenario.id] && (
-                    <div className={`w-full aspect-[3/2] ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} overflow-hidden`}>
-                      <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className={`w-full aspect-[3/2] ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} overflow-hidden p-4`}>
+                      <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                     </div>
                   )}
                   <div className="p-4 sm:p-5">
