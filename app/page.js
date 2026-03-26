@@ -561,12 +561,12 @@ async function api(path, options = {}) {
 // ─── Icons ───
 function WingLogo({ size = 32, className = '' }) {
   return (
-    <div className={`relative ${className}`} style={{ width: size, height: size }}>
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-white font-bold" style={{ fontSize: size * 0.45 }}>W</span>
-      </div>
-    </div>
+    <img
+      src="/images/branding/logo-app-icon.png"
+      alt="Wing Mediator"
+      className={`rounded-xl object-contain ${className}`}
+      style={{ width: size, height: size }}
+    />
   )
 }
 
@@ -722,8 +722,8 @@ function ScenarioPicker({ lang, selected, onSelect }) {
               }`}
             >
               {SCENARIO_IMAGES[scenario.id] && (
-                <div className={`w-full aspect-square rounded-lg sm:rounded-xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} flex items-center justify-center mb-2 sm:mb-3 overflow-hidden`}>
-                  <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-3/4 h-3/4 object-contain drop-shadow-sm" />
+                <div className={`w-full aspect-square rounded-lg sm:rounded-xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} mb-2 sm:mb-3 overflow-hidden`}>
+                  <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-cover" />
                 </div>
               )}
               <div className="flex items-center justify-between mb-1 sm:mb-1.5">
@@ -749,8 +749,8 @@ function ScenarioDetail({ scenario, lang, onClear }) {
     <div className="bg-gradient-to-r from-brand-50 to-white rounded-xl sm:rounded-2xl border border-brand-100 p-4 sm:p-6">
       <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
         {SCENARIO_IMAGES[scenario.id] && (
-          <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} flex items-center justify-center shrink-0 overflow-hidden`}>
-            <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-12 h-12 sm:w-16 sm:h-16 object-contain drop-shadow-sm" />
+          <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} shrink-0 overflow-hidden`}>
+            <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-cover" />
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -924,8 +924,8 @@ function HomeTab({ user, setUser, setTab, lang }) {
             {f.items.map((item, i) => (
               <div key={i} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-7 group">
                 {FEATURE_IMAGES[i] && (
-                  <div className={`w-full aspect-[4/3] rounded-lg sm:rounded-xl ${FEATURE_BG[i] || 'bg-gray-50'} flex items-center justify-center mb-3 sm:mb-5 overflow-hidden`}>
-                    <img src={FEATURE_IMAGES[i]} alt={item.title} className="w-1/2 h-1/2 object-contain drop-shadow-sm" />
+                  <div className={`w-full aspect-[4/3] rounded-lg sm:rounded-xl ${FEATURE_BG[i] || 'bg-gray-50'} flex items-center justify-center mb-3 sm:mb-5 overflow-hidden p-4 sm:p-6`}>
+                    <img src={FEATURE_IMAGES[i]} alt={item.title} className="w-full h-full object-contain" />
                   </div>
                 )}
                 <h3 className="text-sm sm:text-lg font-bold text-gray-900 mb-1.5 sm:mb-3 group-hover:text-brand-700 transition-colors">{item.title}</h3>
@@ -960,8 +960,8 @@ function HomeTab({ user, setUser, setTab, lang }) {
               return (
                 <div key={scenario.id} className="card-hover bg-white rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden group">
                   {SCENARIO_IMAGES[scenario.id] && (
-                    <div className={`w-full aspect-[3/2] ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} flex items-center justify-center overflow-hidden`}>
-                      <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-2/3 h-2/3 object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300" />
+                    <div className={`w-full aspect-[3/2] ${SCENARIO_BG[scenario.id] || 'bg-gray-50'} overflow-hidden`}>
+                      <img src={SCENARIO_IMAGES[scenario.id]} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
                   )}
                   <div className="p-4 sm:p-5">
